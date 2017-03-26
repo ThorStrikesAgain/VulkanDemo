@@ -1,7 +1,8 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
 #include <vector>
+
+#include "Shared.h"
 
 class Renderer
 {
@@ -12,6 +13,9 @@ public:
 private:
     void CreateInstance();
     void DestroyInstance();
+
+    void DisplayInstanceLayers();
+    void DisplayInstanceExtensions();
 
     VkInstance m_Instance = NULL;
 
