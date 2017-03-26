@@ -154,16 +154,16 @@ void Renderer::SetupDebug()
 
 void Renderer::InitDebug()
 {
-    // These methods are not exposed statically and need to be obtained.
-    m_CreateDebugReportCallbackCommand = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugReportCallbackEXT");
+    // These commands are not exposed statically and need to be obtained.
+    m_CreateDebugReportCallbackCommand  = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugReportCallbackEXT");
     m_DestroyDebugReportCallbackCommand = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyDebugReportCallbackEXT");
 
     VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo{};
-    debugReportCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-    debugReportCallbackCreateInfo.pNext = NULL;
-    debugReportCallbackCreateInfo.flags = m_DebugReportFlags;
-    debugReportCallbackCreateInfo.pfnCallback = DebugReportCallback;
-    debugReportCallbackCreateInfo.pUserData = this;
+    debugReportCallbackCreateInfo.sType         = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    debugReportCallbackCreateInfo.pNext         = NULL;
+    debugReportCallbackCreateInfo.flags         = m_DebugReportFlags;
+    debugReportCallbackCreateInfo.pfnCallback   = DebugReportCallback;
+    debugReportCallbackCreateInfo.pUserData     = this;
     
     CheckResult(m_CreateDebugReportCallbackCommand(m_Instance, &debugReportCallbackCreateInfo, NULL, &m_DebugReportCallback));
 }
