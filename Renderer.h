@@ -16,9 +16,25 @@ private:
 
     void DisplayInstanceLayers();
     void DisplayInstanceExtensions();
+    
+    void SetupLayersAndExtensions();
 
-    VkInstance m_Instance = NULL;
+    ///
+    /// Defines the debugging parameters to be used to initialize the debugging.
+    /// Eventually, these should be fetched from a configuration file.
+    ///
+    void SetupDebug();
+    void InitDebug();
+    void DeinitDebug();
+    
+    VkInstance m_Instance                                                       = NULL;
 
-    std::vector<const char*> m_InstanceLayerNames;
-    std::vector<const char*> m_InstanceExtensionNames;
+    std::vector<const char*> m_UsedInstanceLayerNames;
+    std::vector<const char*> m_UsedInstanceExtensionNames;
+
+    PFN_vkCreateDebugReportCallbackEXT m_CreateDebugReportCallbackCommand       = NULL;
+    PFN_vkDestroyDebugReportCallbackEXT m_DestroyDebugReportCallbackCommand     = NULL;
+
+    VkDebugReportFlagsEXT m_DebugReportFlags                                    = 0;
+    VkDebugReportCallbackEXT m_DebugReportCallback                              = VK_NULL_HANDLE;
 };
