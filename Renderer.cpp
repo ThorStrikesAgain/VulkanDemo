@@ -13,12 +13,12 @@ Renderer::~Renderer()
 void Renderer::CreateInstance()
 {
     VkApplicationInfo applicationInfo{};
-    applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    applicationInfo.pApplicationName = "VulkanDemo";
-    applicationInfo.applicationVersion = VK_MAKE_VERSION(0, 1, 0);
-    applicationInfo.pEngineName = "";
-    applicationInfo.engineVersion = VK_MAKE_VERSION(0, 1, 0);
-    applicationInfo.apiVersion = VK_MAKE_VERSION(1, 0, 42);
+    applicationInfo.sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    applicationInfo.pApplicationName    = "VulkanDemo";
+    applicationInfo.applicationVersion  = VK_MAKE_VERSION(0, 1, 0);
+    applicationInfo.pEngineName         = "";
+    applicationInfo.engineVersion       = VK_MAKE_VERSION(0, 1, 0);
+    applicationInfo.apiVersion          = VK_MAKE_VERSION(1, 0, 42);
 
     VkInstanceCreateInfo instanceCreateInfo{};
     instanceCreateInfo.sType                    = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
