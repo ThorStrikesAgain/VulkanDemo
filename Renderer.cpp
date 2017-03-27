@@ -16,18 +16,22 @@ Renderer::Renderer()
 
     CreateInstance();
     InitDebug();
+    SelectPhysicalDevice();
+    CreateDevice();
 }
 
 Renderer::~Renderer()
 {
+    DestroyDevice();
+    DeselectPhysicalDevice();
     DeinitDebug();
     DestroyInstance();
 }
 
 void Renderer::CreateInstance()
 {
-    DisplayInstanceLayers();
-    DisplayInstanceExtensions();
+    DisplayAvailableInstanceLayers();
+    DisplayAvailableInstanceExtensions();
 
     VkApplicationInfo applicationInfo{};
     applicationInfo.sType               = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -57,7 +61,81 @@ void Renderer::DestroyInstance()
     m_Instance = NULL;
 }
 
-void Renderer::DisplayInstanceLayers()
+void Renderer::SelectPhysicalDevice()
+{
+    uint32_t physicalDevicesCount;
+    CheckResult(vkEnumeratePhysicalDevices(m_Instance, &physicalDevicesCount, NULL));
+    std::vector<VkPhysicalDevice> physicalDevices{ physicalDevicesCount };
+    CheckResult(vkEnumeratePhysicalDevices(m_Instance, &physicalDevicesCount, physicalDevices.data()));
+
+    std::cout << "Available Physical Devices:" << std::endl;
+    for (auto physicalDevice : physicalDevices)
+    {
+        VkPhysicalDeviceProperties physicalDeviceProperties;
+        vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+        std::cout << "Device ID: " << physicalDeviceProperties.deviceID << std::endl;
+        std::cout << "Device Name: " << physicalDeviceProperties.deviceName << std::endl;
+        std::cout << std::endl;
+    }
+    
+    // Pick the first device.
+    m_PhysicalDevice = physicalDevices[0];
+}
+
+void Renderer::DeselectPhysicalDevice()
+{
+    m_PhysicalDevice = NULL;
+}
+
+void Renderer::CreateDevice()
+{
+    DisplayAvailableDeviceExtensions();
+
+    // Get the queue families.
+    uint32_t queueFamiliesCount;
+    vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamiliesCount, NULL);
+    std::vector<VkQueueFamilyProperties> queueFamilies{ queueFamiliesCount };
+    vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamiliesCount, queueFamilies.data());
+
+    // Find the first queue suitable for graphics.
+    int graphicsQueueFamilyIndex = -1;
+    for (int i = 0 ; i < queueFamilies.size() ; ++i)
+    {
+        if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
+            graphicsQueueFamilyIndex = i;
+            break;
+        }
+    }
+    assert(graphicsQueueFamilyIndex >= 0 && "Found no queue family with graphics capability.");
+
+    std::array<float, 1> queuePriorities = { 1.0f };
+    VkDeviceQueueCreateInfo graphicsQueueCreateInfo{};
+    graphicsQueueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    graphicsQueueCreateInfo.pNext            = NULL;
+    graphicsQueueCreateInfo.queueFamilyIndex = graphicsQueueFamilyIndex;
+    graphicsQueueCreateInfo.queueCount       = (uint32_t)queuePriorities.size();
+    graphicsQueueCreateInfo.pQueuePriorities = queuePriorities.data();
+
+    VkDeviceCreateInfo deviceCreateInfo{};
+    deviceCreateInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pNext                   = NULL;
+    deviceCreateInfo.queueCreateInfoCount    = 1;
+    deviceCreateInfo.pQueueCreateInfos       = &graphicsQueueCreateInfo;
+    deviceCreateInfo.enabledExtensionCount   = (uint32_t)m_UsedDeviceExtensionNames.size();
+    deviceCreateInfo.ppEnabledExtensionNames = m_UsedDeviceExtensionNames.data();
+    deviceCreateInfo.pEnabledFeatures        = NULL;
+
+    CheckResult(vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, NULL, &m_Device));
+}
+
+void Renderer::DestroyDevice()
+{
+    vkDestroyDevice(m_Device, NULL);
+    m_Device = NULL;
+}
+
+void Renderer::DisplayAvailableInstanceLayers()
 {
     uint32_t layerCount;
     CheckResult(vkEnumerateInstanceLayerProperties(&layerCount, NULL));
@@ -74,7 +152,7 @@ void Renderer::DisplayInstanceLayers()
     std::cout << std::endl;
 }
 
-void Renderer::DisplayInstanceExtensions()
+void Renderer::DisplayAvailableInstanceExtensions()
 {
     uint32_t extensionCount;
     CheckResult(vkEnumerateInstanceExtensionProperties(NULL, &extensionCount, NULL));
@@ -82,6 +160,20 @@ void Renderer::DisplayInstanceExtensions()
     CheckResult(vkEnumerateInstanceExtensionProperties(NULL, &extensionCount, availableExtensions.data()));
 
     std::cout << "Available Instance Extensions:" << std::endl;
+    PrintTable(1, extensionCount, nullptr, [availableExtensions](int row, int col) {
+        return availableExtensions[row].extensionName;
+    });
+    std::cout << std::endl;
+}
+
+void Renderer::DisplayAvailableDeviceExtensions()
+{
+    uint32_t extensionCount;
+    CheckResult(vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, NULL, &extensionCount, NULL));
+    std::vector<VkExtensionProperties> availableExtensions{ extensionCount };
+    CheckResult(vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, NULL, &extensionCount, availableExtensions.data()));
+
+    std::cout << "Available Non-Layer-Specific Device Extensions:" << std::endl;
     PrintTable(1, extensionCount, nullptr, [availableExtensions](int row, int col) {
         return availableExtensions[row].extensionName;
     });

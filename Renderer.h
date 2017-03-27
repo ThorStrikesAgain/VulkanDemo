@@ -14,8 +14,15 @@ private:
     void CreateInstance();
     void DestroyInstance();
 
-    void DisplayInstanceLayers();
-    void DisplayInstanceExtensions();
+    void SelectPhysicalDevice();
+    void DeselectPhysicalDevice();
+
+    void CreateDevice();
+    void DestroyDevice();
+
+    void DisplayAvailableInstanceLayers();
+    void DisplayAvailableInstanceExtensions();
+    void DisplayAvailableDeviceExtensions();
     
     void SetupLayersAndExtensions();
 
@@ -27,10 +34,13 @@ private:
     void InitDebug();
     void DeinitDebug();
     
-    VkInstance m_Instance                                                       = NULL;
+    VkInstance              m_Instance          = NULL;
+    VkPhysicalDevice        m_PhysicalDevice    = NULL;
+    VkDevice                m_Device            = NULL;
 
     std::vector<const char*> m_UsedInstanceLayerNames;
     std::vector<const char*> m_UsedInstanceExtensionNames;
+    std::vector<const char*> m_UsedDeviceExtensionNames;
 
     PFN_vkCreateDebugReportCallbackEXT      m_CreateDebugReportCallbackCommand      = NULL;
     PFN_vkDestroyDebugReportCallbackEXT     m_DestroyDebugReportCallbackCommand     = NULL;
