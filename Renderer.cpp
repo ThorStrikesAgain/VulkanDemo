@@ -39,6 +39,9 @@ void Renderer::CreateInstance()
 
     VkInstanceCreateInfo instanceCreateInfo{};
     instanceCreateInfo.sType                    = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+#if BUILD_ENABLE_VULKAN_DEBUG
+    instanceCreateInfo.pNext                    = &m_DebugReportCallbackCreateInfo;
+#endif
     instanceCreateInfo.pApplicationInfo         = &applicationInfo;
     instanceCreateInfo.enabledLayerCount        = (uint32_t)m_UsedInstanceLayerNames.size();
     instanceCreateInfo.ppEnabledLayerNames      = m_UsedInstanceLayerNames.data();
@@ -139,16 +142,23 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
 
 void Renderer::SetupDebug()
 {
-    m_DebugReportFlags =
+    // Parameters
+    m_DebugReportCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+    m_DebugReportCallbackCreateInfo.pNext = NULL;
+    m_DebugReportCallbackCreateInfo.flags =
         //VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
         VK_DEBUG_REPORT_WARNING_BIT_EXT |
         VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT |
         VK_DEBUG_REPORT_ERROR_BIT_EXT |
         //VK_DEBUG_REPORT_DEBUG_BIT_EXT | 
         0;
+    m_DebugReportCallbackCreateInfo.pfnCallback = DebugReportCallback;
+    m_DebugReportCallbackCreateInfo.pUserData = this;
 
+    // Layers
     m_UsedInstanceLayerNames.push_back("VK_LAYER_LUNARG_standard_validation");
     
+    // Extensions
     m_UsedInstanceExtensionNames.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 }
 
@@ -156,16 +166,12 @@ void Renderer::InitDebug()
 {
     // These commands are not exposed statically and need to be obtained.
     m_CreateDebugReportCallbackCommand  = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugReportCallbackEXT");
-    m_DestroyDebugReportCallbackCommand = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyDebugReportCallbackEXT");
+    assert(m_CreateDebugReportCallbackCommand != 0 && "Failed to retrieve command address.");
 
-    VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo{};
-    debugReportCallbackCreateInfo.sType         = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-    debugReportCallbackCreateInfo.pNext         = NULL;
-    debugReportCallbackCreateInfo.flags         = m_DebugReportFlags;
-    debugReportCallbackCreateInfo.pfnCallback   = DebugReportCallback;
-    debugReportCallbackCreateInfo.pUserData     = this;
-    
-    CheckResult(m_CreateDebugReportCallbackCommand(m_Instance, &debugReportCallbackCreateInfo, NULL, &m_DebugReportCallback));
+    m_DestroyDebugReportCallbackCommand = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyDebugReportCallbackEXT");
+    assert(m_DestroyDebugReportCallbackCommand != 0 && "Failed to retrieve command address.");
+
+    CheckResult(m_CreateDebugReportCallbackCommand(m_Instance, &m_DebugReportCallbackCreateInfo, NULL, &m_DebugReportCallback));
 }
 
 void Renderer::DeinitDebug()

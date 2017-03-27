@@ -32,9 +32,11 @@ private:
     std::vector<const char*> m_UsedInstanceLayerNames;
     std::vector<const char*> m_UsedInstanceExtensionNames;
 
-    PFN_vkCreateDebugReportCallbackEXT m_CreateDebugReportCallbackCommand       = NULL;
-    PFN_vkDestroyDebugReportCallbackEXT m_DestroyDebugReportCallbackCommand     = NULL;
+    PFN_vkCreateDebugReportCallbackEXT      m_CreateDebugReportCallbackCommand      = NULL;
+    PFN_vkDestroyDebugReportCallbackEXT     m_DestroyDebugReportCallbackCommand     = NULL;
 
-    VkDebugReportFlagsEXT m_DebugReportFlags                                    = 0;
-    VkDebugReportCallbackEXT m_DebugReportCallback                              = VK_NULL_HANDLE;
+    // The following structure will be used to capture issues found while creating or destroying an instance (through
+    // the pNext member), and also for the persistent callback. See the documentation of the extension for details.
+    VkDebugReportCallbackCreateInfoEXT      m_DebugReportCallbackCreateInfo = {};
+    VkDebugReportCallbackEXT                m_DebugReportCallback           = VK_NULL_HANDLE;
 };
