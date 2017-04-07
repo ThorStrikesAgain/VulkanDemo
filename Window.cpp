@@ -75,8 +75,23 @@ void Window::Open()
     ATOM windowClassHandle = RegisterClassEx(&windowClassSettings);
     assert(windowClassHandle != 0 && "Failed to register the window class.");
 
-    // Create the window.
+    // Determine the window style. This will impact the required window size.
     DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+    
+    // Calculate the adjusted window rect required in order to have a renderable area that matches what we want.
+    // (0,0) is the top left corner of the window. The horizontal axis increases to the right and the vertical axis
+    // increases downwards.
+    RECT rect{};
+    rect.right = m_Width;
+    rect.bottom = m_Height;
+    BOOL succeeded = AdjustWindowRect(
+        &rect,  // lpRect
+        style,  // dwStyle
+        false   // bMenu
+    );
+    assert(succeeded && "Failed to compute the dimensions to use.");
+
+    // Create the window.
     m_WindowHandle = CreateWindowEx(
         0,                          // dwExStyle,
         m_WindowClassName.c_str(),  // lpClassName
@@ -84,8 +99,8 @@ void Window::Open()
         style,                      // dwStyle
         CW_USEDEFAULT,              // x
         CW_USEDEFAULT,              // y
-        m_Width,                    // nWidth
-        m_Height,                   // nHeight
+        rect.right - rect.left,     // nWidth
+        rect.bottom - rect.top,     // nHeight
         NULL,                       // hWndParent
         NULL,                       // hMenu
         m_AppInstance,              // hInstance
