@@ -28,6 +28,26 @@ Renderer::~Renderer()
     DestroyInstance();
 }
 
+VkInstance Renderer::GetInstance() const
+{
+    return m_Instance;
+}
+
+VkPhysicalDevice Renderer::GetPhysicalDevice() const
+{
+    return m_PhysicalDevice;
+}
+
+VkDevice Renderer::GetDevice() const
+{
+    return m_Device;
+}
+
+uint32_t Renderer::GetGraphicsQueueFamilyIndex() const
+{
+    return m_GraphicsQueueFamilyIndex;
+}
+
 void Renderer::CreateInstance()
 {
     DisplayAvailableInstanceLayers();
@@ -98,22 +118,21 @@ void Renderer::CreateDevice()
     vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamiliesCount, queueFamilies.data());
 
     // Find the first queue suitable for graphics.
-    int graphicsQueueFamilyIndex = -1;
     for (int i = 0 ; i < queueFamilies.size() ; ++i)
     {
         if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
-            graphicsQueueFamilyIndex = i;
+            m_GraphicsQueueFamilyIndex = i;
             break;
         }
     }
-    assert(graphicsQueueFamilyIndex >= 0 && "Found no queue family with graphics capability.");
+    assert(m_GraphicsQueueFamilyIndex >= 0 && "Found no queue family with graphics capability.");
 
     std::array<float, 1> queuePriorities = { 1.0f };
     VkDeviceQueueCreateInfo graphicsQueueCreateInfo{};
     graphicsQueueCreateInfo.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     graphicsQueueCreateInfo.pNext            = NULL;
-    graphicsQueueCreateInfo.queueFamilyIndex = graphicsQueueFamilyIndex;
+    graphicsQueueCreateInfo.queueFamilyIndex = m_GraphicsQueueFamilyIndex;
     graphicsQueueCreateInfo.queueCount       = (uint32_t)queuePriorities.size();
     graphicsQueueCreateInfo.pQueuePriorities = queuePriorities.data();
 
@@ -182,7 +201,15 @@ void Renderer::DisplayAvailableDeviceExtensions()
 
 void Renderer::SetupLayersAndExtensions()
 {
-    // No standard layer or extension to setup.
+    // Instance layers.
+    // (none)
+
+    // Instance extensions.
+    m_UsedInstanceExtensionNames.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    m_UsedInstanceExtensionNames.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+
+    // Device extensions.
+    m_UsedDeviceExtensionNames.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 }
 
 #if BUILD_ENABLE_VULKAN_DEBUG
@@ -226,7 +253,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
 
     if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
     {
-        MessageBox(NULL, stream.str().c_str(), "Vulkan Error!", 0);
+        Fail(stream.str().c_str(), -1);
     }
 
     return false;

@@ -4,7 +4,7 @@
 int main()
 {
     Renderer r;
-    Window w{ 640, 480 };
+    Window w{ 640, 480, &r };
     while (w.Run())
     {
     }

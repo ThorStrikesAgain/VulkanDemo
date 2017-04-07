@@ -10,6 +10,12 @@ public:
     Renderer();
     ~Renderer();
 
+    VkInstance          GetInstance() const;
+    VkPhysicalDevice    GetPhysicalDevice() const;
+    VkDevice            GetDevice() const;
+
+    uint32_t GetGraphicsQueueFamilyIndex() const;
+
 private:
     void CreateInstance();
     void DestroyInstance();
@@ -37,7 +43,7 @@ private:
     VkInstance              m_Instance          = NULL;
     VkPhysicalDevice        m_PhysicalDevice    = NULL;
     VkDevice                m_Device            = NULL;
-
+    
     std::vector<const char*> m_UsedInstanceLayerNames;
     std::vector<const char*> m_UsedInstanceExtensionNames;
     std::vector<const char*> m_UsedDeviceExtensionNames;
@@ -49,4 +55,6 @@ private:
     // the pNext member), and also for the persistent callback. See the documentation of the extension for details.
     VkDebugReportCallbackCreateInfoEXT      m_DebugReportCallbackCreateInfo = {};
     VkDebugReportCallbackEXT                m_DebugReportCallback           = VK_NULL_HANDLE;
+
+    uint32_t        m_GraphicsQueueFamilyIndex      = -1;
 };

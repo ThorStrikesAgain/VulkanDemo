@@ -81,8 +81,7 @@ void CheckResult(VkResult result)
             break;
         }
         
-        MessageBox(NULL, "A Vulkan runtime error has occurred.", "Fatal Error", MB_OK | MB_ICONEXCLAMATION);
-        exit(-1);
+        Fail("A Vulkan runtime error has occurred.", -1);
     }
 }
 
@@ -130,4 +129,11 @@ void PrintTable(int colCount, int rowCount, const char * const * colHeaders, std
         }
         std::cout << std::endl;
     }
+}
+
+void Fail(const char * message, int code)
+{
+    std::cout << "Fatal Error: " << message << std::endl;
+    MessageBox(NULL, message, "Fatal Error", MB_OK | MB_ICONEXCLAMATION);
+    exit(code);
 }

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <functional>
+#define VK_USE_PLATFORM_WIN32_KHR
 
 #include <vulkan/vulkan.h>
+
+#include <functional>
 
 ///
 /// If BUILD_ENABLE_RUNTIME_DEBUG is enabled, when result is negative, the error will be logged, a message box will
@@ -19,3 +21,8 @@ void CheckResult(VkResult result);
 /// @param[in] getItem      Function used to retrieve the data item at the given row and column.
 ///
 void PrintTable(int colCount, int rowCount, const char * const * colHeaders, std::function<const char *(int row, int col)> getItem);
+
+///
+/// Logs the message of a fatal error and exits the application with the given code.
+///
+void Fail(const char* message, int code);
