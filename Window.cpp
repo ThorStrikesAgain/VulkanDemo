@@ -18,8 +18,7 @@ LRESULT CALLBACK Window::WindowProc(
     switch (uMsg)
     {
     case WM_CLOSE:
-        window->Unbind();
-        window->Close();
+        window->m_IsClosed = true;
         return 0;
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -38,13 +37,14 @@ Window::Window(int width, int height, Renderer* renderer)
 
     m_AppInstance = GetModuleHandle(NULL);
 
-    Open();
+    CreateSystemWindow();
     Bind();
 }
 
 Window::~Window()
 {
-    assert(m_WindowHandle == NULL);
+    Unbind();
+    DestroySystemWindow();
 
     m_Renderer = nullptr;
     m_AppInstance = NULL;
@@ -52,7 +52,7 @@ Window::~Window()
 
 bool Window::Run()
 {
-    if (m_WindowHandle == NULL)
+    if (m_IsClosed)
     {
         return false;
     }
@@ -64,27 +64,52 @@ bool Window::Run()
         DispatchMessage(&msg);
     }
 
-    return true;
+    return !m_IsClosed;
 }
 
-void Window::Open()
+VkSwapchainKHR Window::GetSwapchain() const
+{
+    return m_Swapchain;
+}
+
+VkSurfaceFormatKHR const & Window::GetFormat() const
+{
+    return m_Format;
+}
+
+VkSurfaceCapabilitiesKHR const & Window::GetSurfaceCapabilities() const
+{
+    return m_SurfaceCapabilities;
+}
+
+std::vector<VkImage> const & Window::GetImages() const
+{
+    return m_Images;
+}
+
+std::vector<VkImageView> const & Window::GetImageViews() const
+{
+    return m_ImageViews;
+}
+
+void Window::CreateSystemWindow()
 {
     // Create the window class.
     // TODO: The class should be unique and should be reused. For simplicity, we'll temporarily assume that only one
     // window is ever created.
     WNDCLASSEX windowClassSettings{};
-    windowClassSettings.cbSize = sizeof(WNDCLASSEX);
-    windowClassSettings.style = CS_HREDRAW | CS_VREDRAW;
-    windowClassSettings.lpfnWndProc = WindowProc;
-    windowClassSettings.cbClsExtra = 0;
-    windowClassSettings.cbWndExtra = 0;
-    windowClassSettings.hInstance = m_AppInstance;
-    windowClassSettings.hIcon = NULL;
-    windowClassSettings.hCursor = NULL;
-    windowClassSettings.hbrBackground = GetSysColorBrush(COLOR_WINDOW);
-    windowClassSettings.lpszMenuName = NULL;
-    windowClassSettings.lpszClassName = m_WindowClassName.c_str();
-    windowClassSettings.hIconSm = NULL;
+    windowClassSettings.cbSize          = sizeof(WNDCLASSEX);
+    windowClassSettings.style           = CS_HREDRAW | CS_VREDRAW;
+    windowClassSettings.lpfnWndProc     = WindowProc;
+    windowClassSettings.cbClsExtra      = 0;
+    windowClassSettings.cbWndExtra      = 0;
+    windowClassSettings.hInstance       = m_AppInstance;
+    windowClassSettings.hIcon           = NULL;
+    windowClassSettings.hCursor         = NULL;
+    windowClassSettings.hbrBackground   = GetSysColorBrush(COLOR_WINDOW);
+    windowClassSettings.lpszMenuName    = NULL;
+    windowClassSettings.lpszClassName   = m_WindowClassName.c_str();
+    windowClassSettings.hIconSm         = NULL;
 
     ATOM windowClassHandle = RegisterClassEx(&windowClassSettings);
     assert(windowClassHandle != 0 && "Failed to register the window class.");
@@ -127,7 +152,7 @@ void Window::Open()
     ShowWindow(m_WindowHandle, SW_SHOWNORMAL);
 }
 
-void Window::Close()
+void Window::DestroySystemWindow()
 {
     DestroyWindow(m_WindowHandle);
     UnregisterClass(m_WindowClassName.c_str(), m_AppInstance);
@@ -167,14 +192,13 @@ void Window::Bind()
     }
 
     // Get the supported surface capabilities.
-    VkSurfaceCapabilitiesKHR supportedSurfaceCapabilities;
-    CheckResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_Surface, &supportedSurfaceCapabilities));
+    CheckResult(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_Surface, &m_SurfaceCapabilities));
 
     // Select the number of images.
-    uint32_t selectedImageCount = supportedSurfaceCapabilities.minImageCount + 1;
-    if (supportedSurfaceCapabilities.maxImageCount > 0)
+    uint32_t selectedImageCount = m_SurfaceCapabilities.minImageCount + 1;
+    if (m_SurfaceCapabilities.maxImageCount > 0)
     {
-        selectedImageCount = min(selectedImageCount, supportedSurfaceCapabilities.maxImageCount);
+        selectedImageCount = min(selectedImageCount, m_SurfaceCapabilities.maxImageCount);
     }
 
     // Get the supported surface formats.
@@ -185,14 +209,13 @@ void Window::Bind()
     CheckResult(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_Surface, &supportedSurfaceFormatsCount, supportedSurfaceFormats.data()));
 
     // Select a surface format.
-    VkSurfaceFormatKHR selectedSurfaceFormat{};
-    selectedSurfaceFormat.format = VK_FORMAT_B8G8R8_UNORM;
-    selectedSurfaceFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+    m_Format.format = VK_FORMAT_B8G8R8_UNORM;
+    m_Format.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     for (auto const & supportedSurfaceFormat : supportedSurfaceFormats)
     {
         if (supportedSurfaceFormat.format != VK_FORMAT_UNDEFINED)
         {
-            selectedSurfaceFormat = supportedSurfaceFormat;
+            m_Format = supportedSurfaceFormat;
             break;
         }
     }
@@ -222,9 +245,9 @@ void Window::Bind()
     swapchainCreateInfo.flags                   = 0;
     swapchainCreateInfo.surface                 = m_Surface;
     swapchainCreateInfo.minImageCount           = selectedImageCount;
-    swapchainCreateInfo.imageFormat             = selectedSurfaceFormat.format;
-    swapchainCreateInfo.imageColorSpace         = selectedSurfaceFormat.colorSpace;
-    swapchainCreateInfo.imageExtent             = supportedSurfaceCapabilities.currentExtent;
+    swapchainCreateInfo.imageFormat             = m_Format.format;
+    swapchainCreateInfo.imageColorSpace         = m_Format.colorSpace;
+    swapchainCreateInfo.imageExtent             = m_SurfaceCapabilities.currentExtent;
     swapchainCreateInfo.imageArrayLayers        = 1; // Non-stereoscopic-3D
     swapchainCreateInfo.imageUsage              = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     swapchainCreateInfo.imageSharingMode        = VK_SHARING_MODE_EXCLUSIVE;
@@ -236,10 +259,44 @@ void Window::Bind()
     swapchainCreateInfo.clipped                 = VK_TRUE;
     swapchainCreateInfo.oldSwapchain            = VK_NULL_HANDLE;
     CheckResult(vkCreateSwapchainKHR(m_Renderer->GetDevice(), &swapchainCreateInfo, NULL, &m_Swapchain));
+
+    // Get the images.
+    uint32_t imagesCount;
+    CheckResult(vkGetSwapchainImagesKHR(m_Renderer->GetDevice(), m_Swapchain, &imagesCount, NULL));
+    m_Images.resize(imagesCount);
+    CheckResult(vkGetSwapchainImagesKHR(m_Renderer->GetDevice(), m_Swapchain, &imagesCount, m_Images.data()));
+
+    // Create the corresponding image views.
+    m_ImageViews.resize(imagesCount);
+    for (uint32_t i = 0; i < imagesCount; ++i)
+    {
+        VkImageViewCreateInfo imageViewCreateInfo{};
+        imageViewCreateInfo.sType                               = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        imageViewCreateInfo.pNext                               = NULL;
+        imageViewCreateInfo.flags                               = 0;
+        imageViewCreateInfo.image                               = m_Images[i];
+        imageViewCreateInfo.viewType                            = VK_IMAGE_VIEW_TYPE_2D;
+        imageViewCreateInfo.format                              = m_Format.format;
+        imageViewCreateInfo.components.r                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.g                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.b                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.components.a                        = VK_COMPONENT_SWIZZLE_IDENTITY;
+        imageViewCreateInfo.subresourceRange.aspectMask         = VK_IMAGE_ASPECT_COLOR_BIT;
+        imageViewCreateInfo.subresourceRange.baseMipLevel       = 0;
+        imageViewCreateInfo.subresourceRange.levelCount         = 1;
+        imageViewCreateInfo.subresourceRange.baseArrayLayer     = 0;
+        imageViewCreateInfo.subresourceRange.layerCount         = 1;
+        CheckResult(vkCreateImageView(m_Renderer->GetDevice(), &imageViewCreateInfo, NULL, &m_ImageViews[i]));
+    }
 }
 
 void Window::Unbind()
 {
+    for (int i = 0; i < m_ImageViews.size(); ++i)
+    {
+        vkDestroyImageView(m_Renderer->GetDevice(), m_ImageViews[i], NULL);
+    }
+
     vkDestroySwapchainKHR(m_Renderer->GetDevice(), m_Swapchain, NULL);
     m_Swapchain = VK_NULL_HANDLE;
 

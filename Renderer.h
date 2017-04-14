@@ -14,7 +14,8 @@ public:
     VkPhysicalDevice    GetPhysicalDevice() const;
     VkDevice            GetDevice() const;
 
-    uint32_t GetGraphicsQueueFamilyIndex() const;
+    uint32_t            GetGraphicsQueueFamilyIndex() const;
+    VkQueue             GetGraphicsQueue() const;
 
 private:
     void CreateInstance();
@@ -57,4 +58,5 @@ private:
     VkDebugReportCallbackEXT                m_DebugReportCallback           = VK_NULL_HANDLE;
 
     uint32_t        m_GraphicsQueueFamilyIndex      = -1;
+    VkQueue         m_GraphicsQueue                 = NULL;
 };

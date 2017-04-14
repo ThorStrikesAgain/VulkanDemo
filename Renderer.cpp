@@ -48,6 +48,11 @@ uint32_t Renderer::GetGraphicsQueueFamilyIndex() const
     return m_GraphicsQueueFamilyIndex;
 }
 
+VkQueue Renderer::GetGraphicsQueue() const
+{
+    return m_GraphicsQueue;
+}
+
 void Renderer::CreateInstance()
 {
     DisplayAvailableInstanceLayers();
@@ -146,6 +151,8 @@ void Renderer::CreateDevice()
     deviceCreateInfo.pEnabledFeatures        = NULL;
 
     CheckResult(vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, NULL, &m_Device));
+
+    vkGetDeviceQueue(m_Device, m_GraphicsQueueFamilyIndex, 0, &m_GraphicsQueue);
 }
 
 void Renderer::DestroyDevice()
