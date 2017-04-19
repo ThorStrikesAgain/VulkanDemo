@@ -2,6 +2,8 @@
 #include "Window.h"
 #include "WindowRenderer.h"
 
+using namespace VulkanDemo;
+
 int main()
 {
     Renderer r;

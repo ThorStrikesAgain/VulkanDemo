@@ -6,50 +6,53 @@
 
 #include "Shared.h"
 
-class Renderer;
-
-class Window
+namespace VulkanDemo
 {
-public:
-    Window(int width, int height, Renderer* renderer);
-    ~Window();
+    class Renderer;
 
-    bool Run();
+    class Window
+    {
+    public:
+        Window(int width, int height, Renderer* renderer);
+        ~Window();
 
-    VkSwapchainKHR GetSwapchain() const;
-    VkSurfaceFormatKHR const & GetFormat() const;
-    VkSurfaceCapabilitiesKHR const & GetSurfaceCapabilities() const;
-    std::vector<VkImage> const & GetImages() const;
-    std::vector<VkImageView> const & GetImageViews() const;
+        bool Run();
 
-private:
-    void CreateSystemWindow();
-    void DestroySystemWindow();
+        VkSwapchainKHR GetSwapchain() const;
+        VkSurfaceFormatKHR const & GetFormat() const;
+        VkSurfaceCapabilitiesKHR const & GetSurfaceCapabilities() const;
+        std::vector<VkImage> const & GetImages() const;
+        std::vector<VkImageView> const & GetImageViews() const;
 
-    void Bind();
-    void Unbind();
+    private:
+        void CreateSystemWindow();
+        void DestroySystemWindow();
 
-    static LRESULT CALLBACK WindowProc(
-        HWND   hwnd,
-        UINT   uMsg,
-        WPARAM wParam,
-        LPARAM lParam);
+        void Bind();
+        void Unbind();
 
-    int m_Width     = 0;
-    int m_Height    = 0;
+        static LRESULT CALLBACK WindowProc(
+            HWND   hwnd,
+            UINT   uMsg,
+            WPARAM wParam,
+            LPARAM lParam);
 
-    HINSTANCE           m_AppInstance       = NULL;
-    const std::string   m_WindowClassName   = "VulkanDemoWindowClass";
-    HWND                m_WindowHandle      = NULL;
-    bool                m_IsClosed          = false;
+        int m_Width = 0;
+        int m_Height = 0;
 
-    // Renderer-specific variables:
-    Renderer*                   m_Renderer          = nullptr;
-    VkSurfaceKHR                m_Surface           = VK_NULL_HANDLE;
-    VkSurfaceFormatKHR          m_Format{};
-    VkSwapchainKHR              m_Swapchain         = VK_NULL_HANDLE;
-    std::vector<VkImage>        m_Images;
-    std::vector<VkImageView>    m_ImageViews;
-    
-    VkSurfaceCapabilitiesKHR    m_SurfaceCapabilities{};
-};
+        HINSTANCE           m_AppInstance = NULL;
+        const std::string   m_WindowClassName = "VulkanDemoWindowClass";
+        HWND                m_WindowHandle = NULL;
+        bool                m_IsClosed = false;
+
+        // Renderer-specific variables:
+        Renderer*                   m_Renderer = nullptr;
+        VkSurfaceKHR                m_Surface = VK_NULL_HANDLE;
+        VkSurfaceFormatKHR          m_Format{};
+        VkSwapchainKHR              m_Swapchain = VK_NULL_HANDLE;
+        std::vector<VkImage>        m_Images;
+        std::vector<VkImageView>    m_ImageViews;
+
+        VkSurfaceCapabilitiesKHR    m_SurfaceCapabilities{};
+    };
+} // VulkanDemo

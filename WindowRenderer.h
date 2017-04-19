@@ -4,46 +4,49 @@
 
 #include "Shared.h"
 
-class Renderer;
-class Window;
-
-class WindowRenderer
+namespace VulkanDemo
 {
-public:
-    WindowRenderer(Renderer* renderer, Window* window);
-    ~WindowRenderer();
+    class Renderer;
+    class Window;
 
-    void BeginFrame();
-    void EndFrame();
+    class WindowRenderer
+    {
+    public:
+        WindowRenderer(Renderer* renderer, Window* window);
+        ~WindowRenderer();
 
-private:
-    void CreateRenderPass();
-    void DestroyRenderPass();
+        void BeginFrame();
+        void EndFrame();
 
-    void CreateFramebuffers();
-    void DestroyFramebuffers();
+    private:
+        void CreateRenderPass();
+        void DestroyRenderPass();
 
-    void CreateSynchronization();
-    void DestroySynchronization();
+        void CreateFramebuffers();
+        void DestroyFramebuffers();
 
-    void CreateCommandBuffer();
-    void DestroyCommandBuffer();
+        void CreateSynchronization();
+        void DestroySynchronization();
 
-    void WaitForCommandBuffer();
+        void CreateCommandBuffer();
+        void DestroyCommandBuffer();
 
-    Renderer*   m_Renderer  = nullptr;
-    Window*     m_Window    = nullptr;
+        void WaitForCommandBuffer();
 
-    VkRenderPass                m_RenderPass        = VK_NULL_HANDLE;
-    std::vector<VkFramebuffer>  m_FrameBuffers;
+        Renderer*   m_Renderer = nullptr;
+        Window*     m_Window = nullptr;
 
-    uint32_t            m_NextImageIndex            = UINT32_MAX;
+        VkRenderPass                m_RenderPass = VK_NULL_HANDLE;
+        std::vector<VkFramebuffer>  m_FrameBuffers;
 
-    VkSemaphore         m_ImageAcquiredSemaphore        = VK_NULL_HANDLE;
-    VkSemaphore         m_ImageRenderedSemaphore        = VK_NULL_HANDLE;
-    VkFence             m_CommandBufferProcessedFence   = VK_NULL_HANDLE;
-    bool                m_CommandBufferPending          = false;
+        uint32_t            m_NextImageIndex = UINT32_MAX;
 
-    VkCommandPool       m_CommandPool               = VK_NULL_HANDLE;
-    VkCommandBuffer     m_CommandBuffer             = VK_NULL_HANDLE;
-};
+        VkSemaphore         m_ImageAcquiredSemaphore = VK_NULL_HANDLE;
+        VkSemaphore         m_ImageRenderedSemaphore = VK_NULL_HANDLE;
+        VkFence             m_CommandBufferProcessedFence = VK_NULL_HANDLE;
+        bool                m_CommandBufferPending = false;
+
+        VkCommandPool       m_CommandPool = VK_NULL_HANDLE;
+        VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
+    };
+} // VulkanDemo
