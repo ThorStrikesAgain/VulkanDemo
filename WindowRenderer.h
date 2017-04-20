@@ -15,8 +15,7 @@ namespace VulkanDemo
         WindowRenderer(Renderer* renderer, Window* window);
         ~WindowRenderer();
 
-        void BeginFrame();
-        void EndFrame();
+        void Render(VkImageView src);
 
     private:
         void CreateRenderPass();
@@ -46,7 +45,6 @@ namespace VulkanDemo
         VkFence             m_CommandBufferProcessedFence = VK_NULL_HANDLE;
         bool                m_CommandBufferPending = false;
 
-        VkCommandPool       m_CommandPool = VK_NULL_HANDLE;
         VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
     };
 } // VulkanDemo

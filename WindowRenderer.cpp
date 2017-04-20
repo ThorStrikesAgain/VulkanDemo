@@ -34,7 +34,7 @@ namespace VulkanDemo
         m_Renderer = nullptr;
     }
 
-    void WindowRenderer::BeginFrame()
+    void WindowRenderer::Render(VkImageView src)
     {
         CheckResult(vkAcquireNextImageKHR(m_Renderer->GetDevice(), m_Window->GetSwapchain(), UINT64_MAX, m_ImageAcquiredSemaphore, VK_NULL_HANDLE, &m_NextImageIndex));
 
@@ -66,10 +66,12 @@ namespace VulkanDemo
         CheckResult(vkBeginCommandBuffer(m_CommandBuffer, &commandBufferBeginInfo));
 
         vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-    }
 
-    void WindowRenderer::EndFrame()
-    {
+        if (src != VK_NULL_HANDLE)
+        {
+            // TODO: Copy src to the current framebuffer.
+        }
+
         vkCmdEndRenderPass(m_CommandBuffer);
 
         CheckResult(vkEndCommandBuffer(m_CommandBuffer));
@@ -214,19 +216,10 @@ namespace VulkanDemo
 
     void WindowRenderer::CreateCommandBuffer()
     {
-        // Create a command pool.
-        VkCommandPoolCreateInfo commandPoolCreateInfo{};
-        commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        commandPoolCreateInfo.pNext = NULL;
-        commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        commandPoolCreateInfo.queueFamilyIndex = m_Renderer->GetGraphicsQueueFamilyIndex();
-        CheckResult(vkCreateCommandPool(m_Renderer->GetDevice(), &commandPoolCreateInfo, NULL, &m_CommandPool));
-
-        // Create a command buffer.
         VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.pNext = NULL;
-        commandBufferAllocateInfo.commandPool = m_CommandPool;
+        commandBufferAllocateInfo.commandPool = m_Renderer->GetGraphicsCommandPool();
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         commandBufferAllocateInfo.commandBufferCount = 1;
         CheckResult(vkAllocateCommandBuffers(m_Renderer->GetDevice(), &commandBufferAllocateInfo, &m_CommandBuffer));
@@ -234,8 +227,8 @@ namespace VulkanDemo
 
     void WindowRenderer::DestroyCommandBuffer()
     {
-        vkDestroyCommandPool(m_Renderer->GetDevice(), m_CommandPool, NULL);
-        m_CommandPool = VK_NULL_HANDLE;
+        vkFreeCommandBuffers(m_Renderer->GetDevice(), m_Renderer->GetGraphicsCommandPool(), 1, &m_CommandBuffer);
+        m_CommandBuffer = VK_NULL_HANDLE;
     }
 
     void WindowRenderer::WaitForCommandBuffer()

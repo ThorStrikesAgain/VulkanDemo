@@ -20,10 +20,12 @@ namespace VulkanDemo
         InitDebug();
         SelectPhysicalDevice();
         CreateDevice();
+        CreateCommandPools();
     }
 
     Renderer::~Renderer()
     {
+        DestroyCommandPools();
         DestroyDevice();
         DeselectPhysicalDevice();
         DeinitDebug();
@@ -53,6 +55,11 @@ namespace VulkanDemo
     VkQueue Renderer::GetGraphicsQueue() const
     {
         return m_GraphicsQueue;
+    }
+
+    VkCommandPool Renderer::GetGraphicsCommandPool() const
+    {
+        return m_GraphicsCommandPool;
     }
 
     void Renderer::CreateInstance()
@@ -161,6 +168,21 @@ namespace VulkanDemo
     {
         vkDestroyDevice(m_Device, NULL);
         m_Device = NULL;
+    }
+
+    void Renderer::CreateCommandPools()
+    {
+        VkCommandPoolCreateInfo commandPoolCreateInfo{};
+        commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.pNext = NULL;
+        commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        commandPoolCreateInfo.queueFamilyIndex = m_GraphicsQueueFamilyIndex;
+        CheckResult(vkCreateCommandPool(m_Device, &commandPoolCreateInfo, NULL, &m_GraphicsCommandPool));
+    }
+
+    void Renderer::DestroyCommandPools()
+    {
+        vkDestroyCommandPool(m_Device, m_GraphicsCommandPool, NULL);
     }
 
     void Renderer::DisplayAvailableInstanceLayers()

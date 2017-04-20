@@ -19,6 +19,8 @@ namespace VulkanDemo
         uint32_t            GetGraphicsQueueFamilyIndex() const;
         VkQueue             GetGraphicsQueue() const;
 
+        VkCommandPool       GetGraphicsCommandPool() const;
+
     private:
         void CreateInstance();
         void DestroyInstance();
@@ -28,6 +30,9 @@ namespace VulkanDemo
 
         void CreateDevice();
         void DestroyDevice();
+
+        void CreateCommandPools();
+        void DestroyCommandPools();
 
         void DisplayAvailableInstanceLayers();
         void DisplayAvailableInstanceExtensions();
@@ -61,5 +66,8 @@ namespace VulkanDemo
 
         uint32_t        m_GraphicsQueueFamilyIndex = -1;
         VkQueue         m_GraphicsQueue = NULL;
+
+        // Command Pools
+        VkCommandPool   m_GraphicsCommandPool = VK_NULL_HANDLE;
     };
 } // VulkanDemo

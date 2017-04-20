@@ -12,8 +12,8 @@ int main()
 
     while (w.Run())
     {
-        wr.BeginFrame();
-        wr.EndFrame();
+        // TODO: Generate a dummy image.
+        wr.Render(VK_NULL_HANDLE);
     }
 
     return 0;
