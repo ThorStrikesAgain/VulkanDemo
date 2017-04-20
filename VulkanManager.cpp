@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "VulkanManager.h"
 
 #include <cassert>
 
@@ -11,7 +11,7 @@
 
 namespace VulkanDemo
 {
-    Renderer::Renderer()
+    VulkanManager::VulkanManager()
     {
         SetupDebug();
         SetupLayersAndExtensions();
@@ -23,7 +23,7 @@ namespace VulkanDemo
         CreateCommandPools();
     }
 
-    Renderer::~Renderer()
+    VulkanManager::~VulkanManager()
     {
         DestroyCommandPools();
         DestroyDevice();
@@ -32,37 +32,37 @@ namespace VulkanDemo
         DestroyInstance();
     }
 
-    VkInstance Renderer::GetInstance() const
+    VkInstance VulkanManager::GetInstance() const
     {
         return m_Instance;
     }
 
-    VkPhysicalDevice Renderer::GetPhysicalDevice() const
+    VkPhysicalDevice VulkanManager::GetPhysicalDevice() const
     {
         return m_PhysicalDevice;
     }
 
-    VkDevice Renderer::GetDevice() const
+    VkDevice VulkanManager::GetDevice() const
     {
         return m_Device;
     }
 
-    uint32_t Renderer::GetGraphicsQueueFamilyIndex() const
+    uint32_t VulkanManager::GetGraphicsQueueFamilyIndex() const
     {
         return m_GraphicsQueueFamilyIndex;
     }
 
-    VkQueue Renderer::GetGraphicsQueue() const
+    VkQueue VulkanManager::GetGraphicsQueue() const
     {
         return m_GraphicsQueue;
     }
 
-    VkCommandPool Renderer::GetGraphicsCommandPool() const
+    VkCommandPool VulkanManager::GetGraphicsCommandPool() const
     {
         return m_GraphicsCommandPool;
     }
 
-    void Renderer::CreateInstance()
+    void VulkanManager::CreateInstance()
     {
         DisplayAvailableInstanceLayers();
         DisplayAvailableInstanceExtensions();
@@ -89,13 +89,13 @@ namespace VulkanDemo
         CheckResult(vkCreateInstance(&instanceCreateInfo, NULL, &m_Instance));
     }
 
-    void Renderer::DestroyInstance()
+    void VulkanManager::DestroyInstance()
     {
         vkDestroyInstance(m_Instance, NULL);
         m_Instance = NULL;
     }
 
-    void Renderer::SelectPhysicalDevice()
+    void VulkanManager::SelectPhysicalDevice()
     {
         uint32_t physicalDevicesCount;
         CheckResult(vkEnumeratePhysicalDevices(m_Instance, &physicalDevicesCount, NULL));
@@ -116,12 +116,12 @@ namespace VulkanDemo
         m_PhysicalDevice = physicalDevices[0];
     }
 
-    void Renderer::DeselectPhysicalDevice()
+    void VulkanManager::DeselectPhysicalDevice()
     {
         m_PhysicalDevice = NULL;
     }
 
-    void Renderer::CreateDevice()
+    void VulkanManager::CreateDevice()
     {
         DisplayAvailableDeviceExtensions();
 
@@ -164,13 +164,13 @@ namespace VulkanDemo
         vkGetDeviceQueue(m_Device, m_GraphicsQueueFamilyIndex, 0, &m_GraphicsQueue);
     }
 
-    void Renderer::DestroyDevice()
+    void VulkanManager::DestroyDevice()
     {
         vkDestroyDevice(m_Device, NULL);
         m_Device = NULL;
     }
 
-    void Renderer::CreateCommandPools()
+    void VulkanManager::CreateCommandPools()
     {
         VkCommandPoolCreateInfo commandPoolCreateInfo{};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -180,12 +180,12 @@ namespace VulkanDemo
         CheckResult(vkCreateCommandPool(m_Device, &commandPoolCreateInfo, NULL, &m_GraphicsCommandPool));
     }
 
-    void Renderer::DestroyCommandPools()
+    void VulkanManager::DestroyCommandPools()
     {
         vkDestroyCommandPool(m_Device, m_GraphicsCommandPool, NULL);
     }
 
-    void Renderer::DisplayAvailableInstanceLayers()
+    void VulkanManager::DisplayAvailableInstanceLayers()
     {
         uint32_t layerCount;
         CheckResult(vkEnumerateInstanceLayerProperties(&layerCount, NULL));
@@ -202,7 +202,7 @@ namespace VulkanDemo
         std::cout << std::endl;
     }
 
-    void Renderer::DisplayAvailableInstanceExtensions()
+    void VulkanManager::DisplayAvailableInstanceExtensions()
     {
         uint32_t extensionCount;
         CheckResult(vkEnumerateInstanceExtensionProperties(NULL, &extensionCount, NULL));
@@ -216,7 +216,7 @@ namespace VulkanDemo
         std::cout << std::endl;
     }
 
-    void Renderer::DisplayAvailableDeviceExtensions()
+    void VulkanManager::DisplayAvailableDeviceExtensions()
     {
         uint32_t extensionCount;
         CheckResult(vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, NULL, &extensionCount, NULL));
@@ -230,7 +230,7 @@ namespace VulkanDemo
         std::cout << std::endl;
     }
 
-    void Renderer::SetupLayersAndExtensions()
+    void VulkanManager::SetupLayersAndExtensions()
     {
         // Instance layers.
         // (none)
@@ -290,7 +290,7 @@ namespace VulkanDemo
         return false;
     }
 
-    void Renderer::SetupDebug()
+    void VulkanManager::SetupDebug()
     {
         // Parameters
         m_DebugReportCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
@@ -312,7 +312,7 @@ namespace VulkanDemo
         m_UsedInstanceExtensionNames.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     }
 
-    void Renderer::InitDebug()
+    void VulkanManager::InitDebug()
     {
         // These commands are not exposed statically and need to be obtained.
         m_CreateDebugReportCallbackCommand = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugReportCallbackEXT");
@@ -324,7 +324,7 @@ namespace VulkanDemo
         CheckResult(m_CreateDebugReportCallbackCommand(m_Instance, &m_DebugReportCallbackCreateInfo, NULL, &m_DebugReportCallback));
     }
 
-    void Renderer::DeinitDebug()
+    void VulkanManager::DeinitDebug()
     {
         m_DestroyDebugReportCallbackCommand(m_Instance, m_DebugReportCallback, NULL);
         m_DebugReportCallback = VK_NULL_HANDLE;

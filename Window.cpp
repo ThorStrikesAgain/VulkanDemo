@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <array>
 
-#include "Renderer.h"
+#include "VulkanManager.h"
 
 namespace VulkanDemo
 {
@@ -27,15 +27,15 @@ namespace VulkanDemo
         }
     }
 
-    Window::Window(int width, int height, Renderer* renderer)
+    Window::Window(int width, int height, VulkanManager* vulkanManager)
     {
         assert(width > 0);
         assert(height > 0);
-        assert(renderer != nullptr);
+        assert(vulkanManager != nullptr);
 
         m_Width = width;
         m_Height = height;
-        m_Renderer = renderer;
+        m_VulkanManager = vulkanManager;
 
         m_AppInstance = GetModuleHandle(NULL);
 
@@ -48,7 +48,7 @@ namespace VulkanDemo
         Unbind();
         DestroySystemWindow();
 
-        m_Renderer = nullptr;
+        m_VulkanManager = nullptr;
         m_AppInstance = NULL;
     }
 
@@ -163,13 +163,13 @@ namespace VulkanDemo
 
     void Window::Bind()
     {
-        VkPhysicalDevice physicalDevice = m_Renderer->GetPhysicalDevice();
-        uint32_t queueFamily = m_Renderer->GetGraphicsQueueFamilyIndex();
+        VkPhysicalDevice physicalDevice = m_VulkanManager->GetPhysicalDevice();
+        uint32_t queueFamily = m_VulkanManager->GetGraphicsQueueFamilyIndex();
 
         // Query for Win32 WSI support.
         VkBool32 queueFamilyCanPresentToWindows = vkGetPhysicalDeviceWin32PresentationSupportKHR(
             physicalDevice,
-            m_Renderer->GetGraphicsQueueFamilyIndex()
+            m_VulkanManager->GetGraphicsQueueFamilyIndex()
         );
         if (!queueFamilyCanPresentToWindows)
         {
@@ -183,7 +183,7 @@ namespace VulkanDemo
         surfaceCreateInfo.pNext = NULL;
         surfaceCreateInfo.hinstance = m_AppInstance;
         surfaceCreateInfo.hwnd = m_WindowHandle;
-        CheckResult(vkCreateWin32SurfaceKHR(m_Renderer->GetInstance(), &surfaceCreateInfo, NULL, &m_Surface));
+        CheckResult(vkCreateWin32SurfaceKHR(m_VulkanManager->GetInstance(), &surfaceCreateInfo, NULL, &m_Surface));
 
         // Query for WSI support for the surface.
         VkBool32 wsiSupported;
@@ -260,13 +260,13 @@ namespace VulkanDemo
         swapchainCreateInfo.presentMode = selectedPresentMode;
         swapchainCreateInfo.clipped = VK_TRUE;
         swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
-        CheckResult(vkCreateSwapchainKHR(m_Renderer->GetDevice(), &swapchainCreateInfo, NULL, &m_Swapchain));
+        CheckResult(vkCreateSwapchainKHR(m_VulkanManager->GetDevice(), &swapchainCreateInfo, NULL, &m_Swapchain));
 
         // Get the images.
         uint32_t imagesCount;
-        CheckResult(vkGetSwapchainImagesKHR(m_Renderer->GetDevice(), m_Swapchain, &imagesCount, NULL));
+        CheckResult(vkGetSwapchainImagesKHR(m_VulkanManager->GetDevice(), m_Swapchain, &imagesCount, NULL));
         m_Images.resize(imagesCount);
-        CheckResult(vkGetSwapchainImagesKHR(m_Renderer->GetDevice(), m_Swapchain, &imagesCount, m_Images.data()));
+        CheckResult(vkGetSwapchainImagesKHR(m_VulkanManager->GetDevice(), m_Swapchain, &imagesCount, m_Images.data()));
 
         // Create the corresponding image views.
         m_ImageViews.resize(imagesCount);
@@ -288,7 +288,7 @@ namespace VulkanDemo
             imageViewCreateInfo.subresourceRange.levelCount = 1;
             imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
             imageViewCreateInfo.subresourceRange.layerCount = 1;
-            CheckResult(vkCreateImageView(m_Renderer->GetDevice(), &imageViewCreateInfo, NULL, &m_ImageViews[i]));
+            CheckResult(vkCreateImageView(m_VulkanManager->GetDevice(), &imageViewCreateInfo, NULL, &m_ImageViews[i]));
         }
     }
 
@@ -296,13 +296,13 @@ namespace VulkanDemo
     {
         for (int i = 0; i < m_ImageViews.size(); ++i)
         {
-            vkDestroyImageView(m_Renderer->GetDevice(), m_ImageViews[i], NULL);
+            vkDestroyImageView(m_VulkanManager->GetDevice(), m_ImageViews[i], NULL);
         }
 
-        vkDestroySwapchainKHR(m_Renderer->GetDevice(), m_Swapchain, NULL);
+        vkDestroySwapchainKHR(m_VulkanManager->GetDevice(), m_Swapchain, NULL);
         m_Swapchain = VK_NULL_HANDLE;
 
-        vkDestroySurfaceKHR(m_Renderer->GetInstance(), m_Surface, NULL);
+        vkDestroySurfaceKHR(m_VulkanManager->GetInstance(), m_Surface, NULL);
         m_Surface = VK_NULL_HANDLE;
     }
 } // VulkanDemo

@@ -2,17 +2,17 @@
 
 #include <cassert>
 
-#include "Renderer.h"
+#include "VulkanManager.h"
 #include "Window.h"
 
 namespace VulkanDemo
 {
-    WindowRenderer::WindowRenderer(Renderer * renderer, Window * window)
+    WindowRenderer::WindowRenderer(VulkanManager * vulkanManager, Window * window)
     {
-        assert(renderer != nullptr);
+        assert(vulkanManager != nullptr);
         assert(window != nullptr);
 
-        m_Renderer = renderer;
+        m_VulkanManager = vulkanManager;
         m_Window = window;
 
         CreateRenderPass();
@@ -31,12 +31,12 @@ namespace VulkanDemo
         DestroyRenderPass();
 
         m_Window = nullptr;
-        m_Renderer = nullptr;
+        m_VulkanManager = nullptr;
     }
 
     void WindowRenderer::Render(VkImageView src)
     {
-        CheckResult(vkAcquireNextImageKHR(m_Renderer->GetDevice(), m_Window->GetSwapchain(), UINT64_MAX, m_ImageAcquiredSemaphore, VK_NULL_HANDLE, &m_NextImageIndex));
+        CheckResult(vkAcquireNextImageKHR(m_VulkanManager->GetDevice(), m_Window->GetSwapchain(), UINT64_MAX, m_ImageAcquiredSemaphore, VK_NULL_HANDLE, &m_NextImageIndex));
 
         VkCommandBufferBeginInfo commandBufferBeginInfo{};
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -90,7 +90,7 @@ namespace VulkanDemo
         submitInfo.pSignalSemaphores = &m_ImageRenderedSemaphore;
 
         m_CommandBufferPending = true;
-        CheckResult(vkQueueSubmit(m_Renderer->GetGraphicsQueue(), 1, &submitInfo, m_CommandBufferProcessedFence));
+        CheckResult(vkQueueSubmit(m_VulkanManager->GetGraphicsQueue(), 1, &submitInfo, m_CommandBufferProcessedFence));
 
         VkSwapchainKHR swapchain = m_Window->GetSwapchain();
         VkResult result;
@@ -104,7 +104,7 @@ namespace VulkanDemo
         presentInfo.pImageIndices = &m_NextImageIndex;
         presentInfo.pResults = &result;
 
-        CheckResult(vkQueuePresentKHR(m_Renderer->GetGraphicsQueue(), &presentInfo));
+        CheckResult(vkQueuePresentKHR(m_VulkanManager->GetGraphicsQueue(), &presentInfo));
         CheckResult(result);
     }
 
@@ -148,12 +148,12 @@ namespace VulkanDemo
         renderPassCreateInfo.pSubpasses = &subpass;
         renderPassCreateInfo.dependencyCount = 0;
         renderPassCreateInfo.pDependencies = NULL;
-        CheckResult(vkCreateRenderPass(m_Renderer->GetDevice(), &renderPassCreateInfo, NULL, &m_RenderPass));
+        CheckResult(vkCreateRenderPass(m_VulkanManager->GetDevice(), &renderPassCreateInfo, NULL, &m_RenderPass));
     }
 
     void WindowRenderer::DestroyRenderPass()
     {
-        vkDestroyRenderPass(m_Renderer->GetDevice(), m_RenderPass, NULL);
+        vkDestroyRenderPass(m_VulkanManager->GetDevice(), m_RenderPass, NULL);
         m_RenderPass = VK_NULL_HANDLE;
     }
 
@@ -176,7 +176,7 @@ namespace VulkanDemo
             framebufferCreateInfo.width = surfaceCapabilities.currentExtent.width;
             framebufferCreateInfo.height = surfaceCapabilities.currentExtent.height;
             framebufferCreateInfo.layers = 1;
-            CheckResult(vkCreateFramebuffer(m_Renderer->GetDevice(), &framebufferCreateInfo, NULL, &m_FrameBuffers[i]));
+            CheckResult(vkCreateFramebuffer(m_VulkanManager->GetDevice(), &framebufferCreateInfo, NULL, &m_FrameBuffers[i]));
         }
     }
 
@@ -184,7 +184,7 @@ namespace VulkanDemo
     {
         for (int i = 0; i < m_FrameBuffers.size(); ++i)
         {
-            vkDestroyFramebuffer(m_Renderer->GetDevice(), m_FrameBuffers[i], NULL);
+            vkDestroyFramebuffer(m_VulkanManager->GetDevice(), m_FrameBuffers[i], NULL);
         }
         m_FrameBuffers.clear();
     }
@@ -196,22 +196,22 @@ namespace VulkanDemo
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
         semaphoreCreateInfo.pNext = NULL;
         semaphoreCreateInfo.flags = 0;
-        CheckResult(vkCreateSemaphore(m_Renderer->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageAcquiredSemaphore));
-        CheckResult(vkCreateSemaphore(m_Renderer->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageRenderedSemaphore));
+        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageAcquiredSemaphore));
+        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageRenderedSemaphore));
 
         VkFenceCreateInfo fenceCreateInfo{};
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceCreateInfo.pNext = NULL;
         fenceCreateInfo.flags = 0;
-        CheckResult(vkCreateFence(m_Renderer->GetDevice(), &fenceCreateInfo, NULL, &m_CommandBufferProcessedFence));
+        CheckResult(vkCreateFence(m_VulkanManager->GetDevice(), &fenceCreateInfo, NULL, &m_CommandBufferProcessedFence));
     }
 
     void WindowRenderer::DestroySynchronization()
     {
         // TODO: Wait for stuff to become idle.
-        vkDestroyFence(m_Renderer->GetDevice(), m_CommandBufferProcessedFence, NULL);
-        vkDestroySemaphore(m_Renderer->GetDevice(), m_ImageRenderedSemaphore, NULL);
-        vkDestroySemaphore(m_Renderer->GetDevice(), m_ImageAcquiredSemaphore, NULL);
+        vkDestroyFence(m_VulkanManager->GetDevice(), m_CommandBufferProcessedFence, NULL);
+        vkDestroySemaphore(m_VulkanManager->GetDevice(), m_ImageRenderedSemaphore, NULL);
+        vkDestroySemaphore(m_VulkanManager->GetDevice(), m_ImageAcquiredSemaphore, NULL);
     }
 
     void WindowRenderer::CreateCommandBuffer()
@@ -219,15 +219,15 @@ namespace VulkanDemo
         VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.pNext = NULL;
-        commandBufferAllocateInfo.commandPool = m_Renderer->GetGraphicsCommandPool();
+        commandBufferAllocateInfo.commandPool = m_VulkanManager->GetGraphicsCommandPool();
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         commandBufferAllocateInfo.commandBufferCount = 1;
-        CheckResult(vkAllocateCommandBuffers(m_Renderer->GetDevice(), &commandBufferAllocateInfo, &m_CommandBuffer));
+        CheckResult(vkAllocateCommandBuffers(m_VulkanManager->GetDevice(), &commandBufferAllocateInfo, &m_CommandBuffer));
     }
 
     void WindowRenderer::DestroyCommandBuffer()
     {
-        vkFreeCommandBuffers(m_Renderer->GetDevice(), m_Renderer->GetGraphicsCommandPool(), 1, &m_CommandBuffer);
+        vkFreeCommandBuffers(m_VulkanManager->GetDevice(), m_VulkanManager->GetGraphicsCommandPool(), 1, &m_CommandBuffer);
         m_CommandBuffer = VK_NULL_HANDLE;
     }
 
@@ -235,8 +235,8 @@ namespace VulkanDemo
     {
         if (m_CommandBufferPending)
         {
-            CheckResult(vkWaitForFences(m_Renderer->GetDevice(), 1, &m_CommandBufferProcessedFence, VK_TRUE, UINT64_MAX));
-            CheckResult(vkResetFences(m_Renderer->GetDevice(), 1, &m_CommandBufferProcessedFence));
+            CheckResult(vkWaitForFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence, VK_TRUE, UINT64_MAX));
+            CheckResult(vkResetFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence));
             m_CommandBufferPending = false;
         }
     }

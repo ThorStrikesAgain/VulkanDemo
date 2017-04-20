@@ -140,7 +140,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="WindowRenderer.cpp" />
-    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="VulkanManager.cpp" />
     <ClCompile Include="Shared.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -151,7 +151,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="WindowRenderer.h" />
-    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="VulkanManager.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

@@ -6,13 +6,13 @@
 
 namespace VulkanDemo
 {
-    class Renderer;
+    class VulkanManager;
     class Window;
 
     class WindowRenderer
     {
     public:
-        WindowRenderer(Renderer* renderer, Window* window);
+        WindowRenderer(VulkanManager* vulkanManager, Window* window);
         ~WindowRenderer();
 
         void Render(VkImageView src);
@@ -32,8 +32,8 @@ namespace VulkanDemo
 
         void WaitForCommandBuffer();
 
-        Renderer*   m_Renderer = nullptr;
-        Window*     m_Window = nullptr;
+        VulkanManager*   m_VulkanManager = nullptr;
+        Window*          m_Window = nullptr;
 
         VkRenderPass                m_RenderPass = VK_NULL_HANDLE;
         std::vector<VkFramebuffer>  m_FrameBuffers;

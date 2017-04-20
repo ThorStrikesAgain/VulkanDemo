@@ -6,11 +6,11 @@
 
 namespace VulkanDemo
 {
-    class Renderer
+    class VulkanManager
     {
     public:
-        Renderer();
-        ~Renderer();
+        VulkanManager();
+        ~VulkanManager();
 
         VkInstance          GetInstance() const;
         VkPhysicalDevice    GetPhysicalDevice() const;

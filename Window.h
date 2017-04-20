@@ -8,12 +8,12 @@
 
 namespace VulkanDemo
 {
-    class Renderer;
+    class VulkanManager;
 
     class Window
     {
     public:
-        Window(int width, int height, Renderer* renderer);
+        Window(int width, int height, VulkanManager* vulkanManager);
         ~Window();
 
         bool Run();
@@ -46,7 +46,7 @@ namespace VulkanDemo
         bool                m_IsClosed = false;
 
         // Renderer-specific variables:
-        Renderer*                   m_Renderer = nullptr;
+        VulkanManager*              m_VulkanManager = nullptr;
         VkSurfaceKHR                m_Surface = VK_NULL_HANDLE;
         VkSurfaceFormatKHR          m_Format{};
         VkSwapchainKHR              m_Swapchain = VK_NULL_HANDLE;
