@@ -2,17 +2,17 @@
 
 #include <cassert>
 
+#include "Application.h"
 #include "VulkanManager.h"
 #include "Window.h"
 
 namespace VulkanDemo
 {
-    WindowRenderer::WindowRenderer(VulkanManager * vulkanManager, Window * window)
+    WindowRenderer::WindowRenderer(Window * window)
     {
-        assert(vulkanManager != nullptr);
         assert(window != nullptr);
 
-        m_VulkanManager = vulkanManager;
+        m_VulkanManager = Application::GetInstance().GetVulkanManager();
         m_Window = window;
 
         CreateRenderPass();

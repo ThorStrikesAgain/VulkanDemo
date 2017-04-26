@@ -13,7 +13,7 @@ namespace VulkanDemo
     class Window
     {
     public:
-        Window(int width, int height, VulkanManager* vulkanManager);
+        Window(int width, int height);
         ~Window();
 
         bool Run();

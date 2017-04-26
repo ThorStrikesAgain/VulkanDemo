@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <array>
 
+#include "Application.h"
 #include "VulkanManager.h"
 
 namespace VulkanDemo
@@ -27,15 +28,14 @@ namespace VulkanDemo
         }
     }
 
-    Window::Window(int width, int height, VulkanManager* vulkanManager)
+    Window::Window(int width, int height)
     {
         assert(width > 0);
         assert(height > 0);
-        assert(vulkanManager != nullptr);
 
         m_Width = width;
         m_Height = height;
-        m_VulkanManager = vulkanManager;
+        m_VulkanManager = Application::GetInstance().GetVulkanManager();
 
         m_AppInstance = GetModuleHandle(NULL);
 

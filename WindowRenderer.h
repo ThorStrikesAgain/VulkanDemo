@@ -12,7 +12,7 @@ namespace VulkanDemo
     class WindowRenderer
     {
     public:
-        WindowRenderer(VulkanManager* vulkanManager, Window* window);
+        WindowRenderer(Window* window);
         ~WindowRenderer();
 
         void Render(VkImageView src);
