@@ -17,12 +17,7 @@ namespace VulkanDemo
         ~Window();
 
         bool Run();
-
-        VkSwapchainKHR GetSwapchain() const;
-        VkSurfaceFormatKHR const & GetFormat() const;
-        VkSurfaceCapabilitiesKHR const & GetSurfaceCapabilities() const;
-        std::vector<VkImage> const & GetImages() const;
-        std::vector<VkImageView> const & GetImageViews() const;
+        void Render();
 
     private:
         void CreateSystemWindow();
@@ -30,6 +25,20 @@ namespace VulkanDemo
 
         void Bind();
         void Unbind();
+
+        void CreateRenderPass();
+        void DestroyRenderPass();
+
+        void CreateFramebuffers();
+        void DestroyFramebuffers();
+
+        void CreateSynchronization();
+        void DestroySynchronization();
+
+        void CreateCommandBuffer();
+        void DestroyCommandBuffer();
+
+        void WaitForCommandBuffer();
 
         static LRESULT CALLBACK WindowProc(
             HWND   hwnd,
@@ -54,5 +63,17 @@ namespace VulkanDemo
         std::vector<VkImageView>    m_ImageViews;
 
         VkSurfaceCapabilitiesKHR    m_SurfaceCapabilities{};
+
+        VkRenderPass                m_RenderPass = VK_NULL_HANDLE;
+        std::vector<VkFramebuffer>  m_FrameBuffers;
+
+        uint32_t            m_NextImageIndex = UINT32_MAX;
+
+        VkSemaphore         m_ImageAcquiredSemaphore = VK_NULL_HANDLE;
+        VkSemaphore         m_ImageRenderedSemaphore = VK_NULL_HANDLE;
+        VkFence             m_CommandBufferProcessedFence = VK_NULL_HANDLE;
+        bool                m_CommandBufferPending = false;
+
+        VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
     };
 } // VulkanDemo

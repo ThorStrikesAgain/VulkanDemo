@@ -3,7 +3,6 @@
 namespace VulkanDemo
 {
     class VulkanManager;
-    class Window;
 
     class Application
     {

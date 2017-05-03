@@ -139,8 +139,8 @@
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="SceneRenderer.cpp" />
     <ClCompile Include="Transform.cpp" />
-    <ClCompile Include="WindowRenderer.cpp" />
     <ClCompile Include="VulkanManager.cpp" />
     <ClCompile Include="Shared.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -151,8 +151,8 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="SceneRenderer.h" />
     <ClInclude Include="Transform.h" />
-    <ClInclude Include="WindowRenderer.h" />
     <ClInclude Include="VulkanManager.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="Window.h" />

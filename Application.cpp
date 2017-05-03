@@ -1,8 +1,8 @@
 #include "Application.h"
 
 #include "VulkanManager.h"
+
 #include "Window.h"
-#include "WindowRenderer.h"
 
 namespace VulkanDemo
 {
@@ -26,12 +26,10 @@ namespace VulkanDemo
     void Application::MainLoop()
     {
         Window w{ 640, 480 };
-        WindowRenderer wr{ &w };
 
         while (w.Run())
         {
-            // TODO: Generate a dummy image.
-            wr.Render(VK_NULL_HANDLE);
+            w.Render();
         }
     }
 
