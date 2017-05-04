@@ -4,22 +4,22 @@
 
 namespace VulkanDemo
 {
-	class GameObject;
+    class GameObject;
 
-	class Component : public Object
-	{
-		friend GameObject;
+    class Component : public Object
+    {
+        friend GameObject;
 
-	public:
-		Component();
-		virtual ~Component();
+    public:
+        Component();
+        virtual ~Component();
 
-		GameObject* GetGameObject() const;
+        GameObject* GetGameObject() const;
 
-	private:
-		Component(Component const &other) = delete;
-		void operator=(Component const &other) = delete;
+    private:
+        Component(Component const &other) = delete;
+        void operator=(Component const &other) = delete;
 
-		GameObject* m_GameObject;
-	};
+        GameObject* m_GameObject;
+    };
 } // VulkanDemo
