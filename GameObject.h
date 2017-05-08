@@ -14,12 +14,12 @@ namespace VulkanDemo
 
         void AddComponent(Component& component);
         void RemoveComponent(const Component& component);
-        std::vector<Component*> const & GetComponents() const;
+        inline std::vector<Component*> const & GetComponents() const { return m_Components; }
 
-        GameObject* GetParent() const;
+        inline GameObject* GetParent() const { return m_Parent; }
         void SetParent(GameObject* parent);
 
-        std::vector<GameObject*> const & GetChildren() const;
+        inline std::vector<GameObject*> const & GetChildren() const { return m_Children; }
 
         ///
         /// Indicates whether the provided transform is strictly a descendant of this object. If the provided object is

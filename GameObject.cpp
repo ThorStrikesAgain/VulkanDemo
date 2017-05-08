@@ -57,16 +57,6 @@ namespace VulkanDemo
         }
     }
 
-    std::vector<Component*> const & GameObject::GetComponents() const
-    {
-        return m_Components;
-    }
-
-    GameObject* GameObject::GetParent() const
-    {
-        return m_Parent;
-    }
-
     ///
     /// The parent doesn't take ownership of this game object.
     ///
@@ -101,11 +91,6 @@ namespace VulkanDemo
 
         // Set the new parent.
         m_Parent = newParent;
-    }
-
-    std::vector<GameObject*> const & GameObject::GetChildren() const
-    {
-        return m_Children;
     }
 
     bool GameObject::IsDescendantOf(GameObject const & some) const

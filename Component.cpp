@@ -15,9 +15,4 @@ namespace VulkanDemo
             m_GameObject->RemoveComponent(*this);
         }
     }
-
-    GameObject* Component::GetGameObject() const
-    {
-        return m_GameObject;
-    }
 } // VulkanDemo

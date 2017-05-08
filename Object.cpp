@@ -15,14 +15,4 @@ namespace VulkanDemo
     Object::~Object()
     {
     }
-
-    std::string const & Object::GetName() const
-    {
-        return m_Name;
-    }
-
-    void Object::SetName(std::string const &name)
-    {
-        m_Name = name;
-    }
 } // VulkanDemo

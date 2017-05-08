@@ -32,36 +32,6 @@ namespace VulkanDemo
         DestroyInstance();
     }
 
-    VkInstance VulkanManager::GetInstance() const
-    {
-        return m_Instance;
-    }
-
-    VkPhysicalDevice VulkanManager::GetPhysicalDevice() const
-    {
-        return m_PhysicalDevice;
-    }
-
-    VkDevice VulkanManager::GetDevice() const
-    {
-        return m_Device;
-    }
-
-    uint32_t VulkanManager::GetGraphicsQueueFamilyIndex() const
-    {
-        return m_GraphicsQueueFamilyIndex;
-    }
-
-    VkQueue VulkanManager::GetGraphicsQueue() const
-    {
-        return m_GraphicsQueue;
-    }
-
-    VkCommandPool VulkanManager::GetGraphicsCommandPool() const
-    {
-        return m_GraphicsCommandPool;
-    }
-
     void VulkanManager::CreateInstance()
     {
         DisplayAvailableInstanceLayers();

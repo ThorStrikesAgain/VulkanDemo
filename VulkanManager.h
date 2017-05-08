@@ -12,14 +12,14 @@ namespace VulkanDemo
         VulkanManager();
         ~VulkanManager();
 
-        VkInstance          GetInstance() const;
-        VkPhysicalDevice    GetPhysicalDevice() const;
-        VkDevice            GetDevice() const;
+        inline VkInstance           GetInstance() const { return m_Instance; }
+        inline VkPhysicalDevice     GetPhysicalDevice() const { return m_PhysicalDevice; }
+        inline VkDevice             GetDevice() const { return m_Device; }
 
-        uint32_t            GetGraphicsQueueFamilyIndex() const;
-        VkQueue             GetGraphicsQueue() const;
+        inline uint32_t             GetGraphicsQueueFamilyIndex() const { return m_GraphicsQueueFamilyIndex; }
+        inline VkQueue              GetGraphicsQueue() const{ return m_GraphicsQueue; }
 
-        VkCommandPool       GetGraphicsCommandPool() const;
+        inline VkCommandPool        GetGraphicsCommandPool() const { return m_GraphicsCommandPool; }
 
     private:
         void CreateInstance();

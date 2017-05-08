@@ -15,7 +15,7 @@ namespace VulkanDemo
 
         void MainLoop();
 
-        VulkanManager * GetVulkanManager() const;
+        inline VulkanManager * GetVulkanManager() const { return m_VulkanManager; }
 
     private:
         Application();

@@ -13,14 +13,14 @@ namespace VulkanDemo
         Transform();
         virtual ~Transform();
 
-        glm::vec3 const & GetLocalPosition() const;
-        void SetLocalPosition(glm::vec3 const & localPosition);
+        inline glm::vec3 const & GetLocalPosition() const { return m_LocalPosition; }
+        inline void SetLocalPosition(glm::vec3 const & localPosition) { m_LocalPosition = localPosition; }
 
-        glm::quat const & GetLocalRotation() const;
-        void SetLocalRotation(glm::quat const & localRotation);
+        inline glm::quat const & GetLocalRotation() const { return m_LocalRotation; }
+        inline void SetLocalRotation(glm::quat const & localRotation) { m_LocalRotation = localRotation; }
 
-        glm::vec3 const & GetLocalScale() const;
-        void SetLocalScale(glm::vec3 const & localScale);
+        inline glm::vec3 const & GetLocalScale() const { return m_LocalScale; }
+        inline void SetLocalScale(glm::vec3 const & localScale) { m_LocalScale = localScale; }
 
     private:
         Transform(Transform const & other) = delete;

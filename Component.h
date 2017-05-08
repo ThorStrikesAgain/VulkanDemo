@@ -14,7 +14,7 @@ namespace VulkanDemo
         Component();
         virtual ~Component();
 
-        GameObject* GetGameObject() const;
+        inline GameObject* GetGameObject() const { return m_GameObject; }
 
     private:
         Component(Component const &other) = delete;

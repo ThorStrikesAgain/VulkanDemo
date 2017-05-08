@@ -10,8 +10,8 @@ namespace VulkanDemo
         Object();
         virtual ~Object();
 
-        std::string const & GetName() const;
-        void SetName(std::string const &name);
+        inline std::string const & GetName() const { return m_Name; }
+        inline void SetName(std::string const &name) { m_Name = name; }
 
     private:
         Object(Object const &other) = delete;

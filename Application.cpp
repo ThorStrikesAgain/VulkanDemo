@@ -32,9 +32,4 @@ namespace VulkanDemo
             w.Render();
         }
     }
-
-    VulkanManager * Application::GetVulkanManager() const
-    {
-        return m_VulkanManager;
-    }
 } // VulkanDemo
