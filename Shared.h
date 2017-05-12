@@ -9,6 +9,12 @@
 namespace VulkanDemo
 {
     ///
+    /// Allocates device memory for the image, and binds it to it. Terminates the application on failure to find a
+    /// suitable memory type or if the allocation or binding operation fails.
+    ///
+    VkDeviceMemory AllocateAndBindImageMemory(VkImage image);
+
+    ///
     /// If BUILD_ENABLE_RUNTIME_DEBUG is enabled, when result is negative, the error will be logged, a message box will
     /// be displayed a message box is displayed and the application will exit.
     /// 

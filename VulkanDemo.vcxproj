@@ -135,10 +135,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneRenderer.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VulkanManager.cpp" />
@@ -148,9 +150,12 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="BUILD_OPTIONS.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="Configuration.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneRenderer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VulkanManager.h" />

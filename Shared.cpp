@@ -9,10 +9,58 @@
 
 #include "BUILD_OPTIONS.h"
 
-#if BUILD_ENABLE_RUNTIME_DEBUG
+#include "Application.h"
+#include "VulkanManager.h"
 
 namespace VulkanDemo
 {
+    VkDeviceMemory AllocateAndBindImageMemory(VkImage image)
+    {
+        assert(image != VK_NULL_HANDLE);
+
+        VulkanManager * vulkanManager = Application::GetInstance().GetVulkanManager();
+
+        // List the types that can be used for the image.
+        VkMemoryRequirements requirements;
+        vkGetImageMemoryRequirements(vulkanManager->GetDevice(), image, &requirements);
+
+        // List the types that support the properties we want.
+        VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
+        vkGetPhysicalDeviceMemoryProperties(vulkanManager->GetPhysicalDevice(), &physicalDeviceMemoryProperties);
+        for (uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; ++i)
+        {
+            if (((1 << i) & requirements.memoryTypeBits) == 0)
+            {
+                // This memory type cannot be used for the image.
+                continue;
+            }
+
+            VkMemoryPropertyFlags flags = physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags;
+            if ((flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0)
+            {
+                // This memory type does not match our requirements.
+                continue;
+            }
+
+            VkMemoryAllocateInfo allocateInfo{};
+            allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+            allocateInfo.pNext = NULL;
+            allocateInfo.allocationSize = requirements.size;
+            allocateInfo.memoryTypeIndex = i;
+
+            VkDeviceMemory memory;
+            CheckResult(vkAllocateMemory(vulkanManager->GetDevice(), &allocateInfo, NULL, &memory));
+
+            CheckResult(vkBindImageMemory(vulkanManager->GetDevice(), image, memory, 0));
+
+            return memory;
+        }
+
+        Fail("Failed to find a suitable memory type.", -1);
+        return VK_NULL_HANDLE; // This statement should not be executed.
+    }
+
+#if BUILD_ENABLE_RUNTIME_DEBUG
     void CheckResult(VkResult result)
     {
         if (result < 0)

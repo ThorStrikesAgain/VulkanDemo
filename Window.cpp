@@ -28,7 +28,8 @@ namespace VulkanDemo
         }
     }
 
-    Window::Window(int width, int height)
+    Window::Window(int width, int height) : 
+        m_SceneRenderer(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
     {
         assert(width > 0);
         assert(height > 0);
@@ -292,6 +293,10 @@ namespace VulkanDemo
 
     void Window::Render()
     {
+        // Render the scene.
+        m_SceneRenderer.Render(nullptr, m_Width, m_Height);
+
+        // Copy to the window.
         CheckResult(vkAcquireNextImageKHR(m_VulkanManager->GetDevice(), m_Swapchain, UINT64_MAX, m_ImageAcquiredSemaphore, VK_NULL_HANDLE, &m_NextImageIndex));
 
         VkCommandBufferBeginInfo commandBufferBeginInfo{};

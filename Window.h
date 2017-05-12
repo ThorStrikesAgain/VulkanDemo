@@ -6,6 +6,8 @@
 
 #include "Shared.h"
 
+#include "SceneRenderer.h"
+
 namespace VulkanDemo
 {
     class VulkanManager;
@@ -56,6 +58,7 @@ namespace VulkanDemo
 
         // Renderer-specific variables:
         VulkanManager*              m_VulkanManager = nullptr;
+        SceneRenderer               m_SceneRenderer;
         VkSurfaceKHR                m_Surface = VK_NULL_HANDLE;
         VkSurfaceFormatKHR          m_Format{};
         VkSwapchainKHR              m_Swapchain = VK_NULL_HANDLE;
