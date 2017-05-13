@@ -22,9 +22,12 @@ namespace VulkanDemo
         void CreateForwardRenderPass();
         void DestroyForwardRenderpass();
 
-        void UpdateRenderBuffer(int width, int height);
-        void CreateRenderBuffer(int width, int height);
-        void DestroyRenderBuffer();
+        void UpdateFramebuffer(int width, int height);
+        void CreateFramebuffer(int width, int height);
+        void DestroyFramebuffer();
+
+        void CreateCommandBuffer();
+        void DestroyCommandBuffer();
 
         VulkanManager * m_VulkanManager = nullptr;
 
@@ -37,8 +40,14 @@ namespace VulkanDemo
 
         VkImage m_ForwardColorImage = VK_NULL_HANDLE;
         VkDeviceMemory m_ForwardColorMemory = VK_NULL_HANDLE;
+        VkImageView m_ForwardColorImageView = VK_NULL_HANDLE;
 
         VkImage m_ForwardDepthStencilImage = VK_NULL_HANDLE;
         VkDeviceMemory m_ForwardDepthStencilMemory = VK_NULL_HANDLE;
+        VkImageView m_ForwardDepthStencilImageView = VK_NULL_HANDLE;
+
+        VkFramebuffer m_ForwardFramebuffer = VK_NULL_HANDLE;
+
+        VkCommandBuffer m_CommandBuffer = NULL;
     };
 } // VulkanDemo
