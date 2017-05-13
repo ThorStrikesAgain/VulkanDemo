@@ -294,7 +294,15 @@ namespace VulkanDemo
     void Window::Render()
     {
         // Render the scene.
-        m_SceneRenderer.Render(nullptr, m_Width, m_Height);
+        SceneRenderResult renderResult;
+        
+        SceneRenderInfo renderInfo{};
+        renderInfo.scene = nullptr;
+        renderInfo.width = m_Width;
+        renderInfo.height = m_Height;
+        renderInfo.waitSemaphore = m_LastSceneRenderSemaphore;
+        m_SceneRenderer.Render(renderInfo, renderResult);
+        m_LastSceneRenderSemaphore = renderResult.waitSemaphore;
 
         // Copy to the window.
         CheckResult(vkAcquireNextImageKHR(m_VulkanManager->GetDevice(), m_Swapchain, UINT64_MAX, m_ImageAcquiredSemaphore, VK_NULL_HANDLE, &m_NextImageIndex));

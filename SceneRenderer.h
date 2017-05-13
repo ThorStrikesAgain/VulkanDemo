@@ -7,6 +7,20 @@ namespace VulkanDemo
     class Scene;
     class VulkanManager;
 
+    struct SceneRenderInfo
+    {
+        Scene * scene;
+        int width;
+        int height;
+        VkSemaphore waitSemaphore; // Signaled when we can begin rendering.
+    };
+
+    struct SceneRenderResult
+    {
+        VkImage image;
+        VkSemaphore waitSemaphore; // Signaled when the image is ready.
+    };
+
     ///
     /// Renders a scene using the forward rendering technique.
     ///
@@ -16,7 +30,7 @@ namespace VulkanDemo
         SceneRenderer(VkImageLayout colorLayout);
         ~SceneRenderer();
 
-        VkImage Render(const Scene * scene, int width, int height);
+        void Render(const SceneRenderInfo & renderInfo, SceneRenderResult & renderResult);
 
     private:
         void CreateForwardRenderPass();
@@ -28,6 +42,9 @@ namespace VulkanDemo
 
         void CreateCommandBuffer();
         void DestroyCommandBuffer();
+
+        void CreateSynchronization();
+        void DestroySynchronization();
 
         VulkanManager * m_VulkanManager = nullptr;
 
@@ -49,5 +66,8 @@ namespace VulkanDemo
         VkFramebuffer m_ForwardFramebuffer = VK_NULL_HANDLE;
 
         VkCommandBuffer m_CommandBuffer = NULL;
+
+        VkSemaphore m_Semaphore = VK_NULL_HANDLE;
+        VkFence m_Fence = VK_NULL_HANDLE;
     };
 } // VulkanDemo

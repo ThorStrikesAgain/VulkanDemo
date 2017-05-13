@@ -17,6 +17,7 @@ namespace VulkanDemo
 
         CreateForwardRenderPass();
         CreateCommandBuffer();
+        CreateSynchronization();
     }
 
     SceneRenderer::~SceneRenderer()
@@ -26,51 +27,85 @@ namespace VulkanDemo
             DestroyFramebuffer();
         }
 
+        DestroySynchronization();
         DestroyCommandBuffer();
         DestroyForwardRenderpass();
 
         m_VulkanManager = nullptr;
     }
-
-    VkImage SceneRenderer::Render(const Scene * scene, int width, int height)
+    void SceneRenderer::Render(const SceneRenderInfo & renderInfo, SceneRenderResult & renderResult)
     {
-        UpdateFramebuffer(width, height);
-        // TODO: Render the objects according to the camera.
+        // Wait for the command buffer to leave the pending state.
+        CheckResult(vkWaitForFences(m_VulkanManager->GetDevice(), 1, &m_Fence, VK_TRUE, UINT64_MAX));
+        CheckResult(vkResetFences(m_VulkanManager->GetDevice(), 1, &m_Fence));
 
-        VkCommandBufferBeginInfo commandBufferBeginInfo{};
-        commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        commandBufferBeginInfo.pNext = NULL;
-        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        commandBufferBeginInfo.pInheritanceInfo = NULL;
-        CheckResult(vkBeginCommandBuffer(m_CommandBuffer, &commandBufferBeginInfo));
+        UpdateFramebuffer(renderInfo.width, renderInfo.height);
         
-        VkClearValue clearValue{};
-        clearValue.color.float32[0] = 0.0f;
-        clearValue.color.float32[1] = 0.0f;
-        clearValue.color.float32[2] = 1.0f;
-        clearValue.color.float32[3] = 1.0f;
-        clearValue.depthStencil.depth = 1.0f;
-        clearValue.depthStencil.stencil = 0;
+        // Compute the command buffer.
+        {
+            VkCommandBufferBeginInfo commandBufferBeginInfo{};
+            commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            commandBufferBeginInfo.pNext = NULL;
+            commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+            commandBufferBeginInfo.pInheritanceInfo = NULL;
+            CheckResult(vkBeginCommandBuffer(m_CommandBuffer, &commandBufferBeginInfo));
 
-        VkRenderPassBeginInfo renderPassBeginInfo{};
-        renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.pNext = NULL;
-        renderPassBeginInfo.renderPass = m_ForwardRenderPass;
-        renderPassBeginInfo.framebuffer = m_ForwardFramebuffer;
-        renderPassBeginInfo.renderArea.extent.width = m_Width;
-        renderPassBeginInfo.renderArea.extent.height = m_Height;
-        renderPassBeginInfo.renderArea.offset.x = 0;
-        renderPassBeginInfo.renderArea.offset.y = 0;
-        renderPassBeginInfo.clearValueCount = 2;
-        renderPassBeginInfo.pClearValues = &clearValue;
-        vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-        
-        vkCmdEndRenderPass(m_CommandBuffer);
+            VkClearValue clearValue{};
+            clearValue.color.float32[0] = 0.0f;
+            clearValue.color.float32[1] = 0.0f;
+            clearValue.color.float32[2] = 1.0f;
+            clearValue.color.float32[3] = 1.0f;
+            clearValue.depthStencil.depth = 1.0f;
+            clearValue.depthStencil.stencil = 0;
 
-        CheckResult(vkEndCommandBuffer(m_CommandBuffer));
+            VkRenderPassBeginInfo renderPassBeginInfo{};
+            renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            renderPassBeginInfo.pNext = NULL;
+            renderPassBeginInfo.renderPass = m_ForwardRenderPass;
+            renderPassBeginInfo.framebuffer = m_ForwardFramebuffer;
+            renderPassBeginInfo.renderArea.extent.width = m_Width;
+            renderPassBeginInfo.renderArea.extent.height = m_Height;
+            renderPassBeginInfo.renderArea.offset.x = 0;
+            renderPassBeginInfo.renderArea.offset.y = 0;
+            renderPassBeginInfo.clearValueCount = 2;
+            renderPassBeginInfo.pClearValues = &clearValue;
+            vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // For now, we'll just clear an empty image with the right size.
-        return VK_NULL_HANDLE;
+            // TODO: Render the objects according to the camera.
+
+            vkCmdEndRenderPass(m_CommandBuffer);
+
+            CheckResult(vkEndCommandBuffer(m_CommandBuffer));
+        }
+
+        // Submit the command buffer.
+        {
+            VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+            VkSubmitInfo submitInfo{};
+            submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submitInfo.pNext = NULL;
+            if (renderInfo.waitSemaphore != VK_NULL_HANDLE)
+            {
+                submitInfo.waitSemaphoreCount = 1;
+                submitInfo.pWaitSemaphores = &renderInfo.waitSemaphore;
+            }
+            else
+            {
+                submitInfo.waitSemaphoreCount = 0;
+                submitInfo.pWaitSemaphores = NULL;
+            }
+            submitInfo.pWaitDstStageMask = &waitDstStageMask;
+            submitInfo.commandBufferCount = 1;
+            submitInfo.pCommandBuffers = &m_CommandBuffer;
+            submitInfo.signalSemaphoreCount = 1;
+            submitInfo.pSignalSemaphores = &m_Semaphore;
+
+            CheckResult(vkQueueSubmit(m_VulkanManager->GetGraphicsQueue(), 1, &submitInfo, m_Fence));
+        }
+
+        renderResult.image = m_ForwardColorImage;
+        renderResult.waitSemaphore = m_Semaphore;
     }
 
     void SceneRenderer::CreateForwardRenderPass()
@@ -301,5 +336,26 @@ namespace VulkanDemo
     {
         vkFreeCommandBuffers(m_VulkanManager->GetDevice(), m_VulkanManager->GetGraphicsCommandPool(), 1, &m_CommandBuffer);
         m_CommandBuffer = VK_NULL_HANDLE;
+    }
+
+    void SceneRenderer::CreateSynchronization()
+    {
+        VkSemaphoreCreateInfo semaphoreCreateInfo{};
+        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        semaphoreCreateInfo.pNext = NULL;
+        semaphoreCreateInfo.flags = 0;
+        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_Semaphore));
+
+        VkFenceCreateInfo fenceCreateInfo{};
+        fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceCreateInfo.pNext = NULL;
+        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT; // Used to simplify the initial state management.
+        CheckResult(vkCreateFence(m_VulkanManager->GetDevice(), &fenceCreateInfo, NULL, &m_Fence));
+    }
+
+    void SceneRenderer::DestroySynchronization()
+    {
+        vkDestroyFence(m_VulkanManager->GetDevice(), m_Fence, NULL);
+        vkDestroySemaphore(m_VulkanManager->GetDevice(), m_Semaphore, NULL);
     }
 } // VulkanDemo

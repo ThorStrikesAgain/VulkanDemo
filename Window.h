@@ -78,5 +78,7 @@ namespace VulkanDemo
         bool                m_CommandBufferPending = false;
 
         VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
+
+        VkSemaphore         m_LastSceneRenderSemaphore = VK_NULL_HANDLE;
     };
 } // VulkanDemo
