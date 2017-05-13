@@ -355,7 +355,6 @@ namespace VulkanDemo
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &m_ImageRenderedSemaphore;
 
-        m_CommandBufferPending = true;
         CheckResult(vkQueueSubmit(m_VulkanManager->GetGraphicsQueue(), 1, &submitInfo, m_CommandBufferProcessedFence));
 
         VkSwapchainKHR swapchain = m_Swapchain;
@@ -468,7 +467,7 @@ namespace VulkanDemo
         VkFenceCreateInfo fenceCreateInfo{};
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceCreateInfo.pNext = NULL;
-        fenceCreateInfo.flags = 0;
+        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
         CheckResult(vkCreateFence(m_VulkanManager->GetDevice(), &fenceCreateInfo, NULL, &m_CommandBufferProcessedFence));
     }
 
@@ -499,11 +498,7 @@ namespace VulkanDemo
 
     void Window::WaitForCommandBuffer()
     {
-        if (m_CommandBufferPending)
-        {
-            CheckResult(vkWaitForFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence, VK_TRUE, UINT64_MAX));
-            CheckResult(vkResetFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence));
-            m_CommandBufferPending = false;
-        }
+        CheckResult(vkWaitForFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence, VK_TRUE, UINT64_MAX));
+        CheckResult(vkResetFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence));
     }
 } // VulkanDemo

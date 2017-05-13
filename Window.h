@@ -75,7 +75,6 @@ namespace VulkanDemo
         VkSemaphore         m_ImageAcquiredSemaphore = VK_NULL_HANDLE;
         VkSemaphore         m_ImageRenderedSemaphore = VK_NULL_HANDLE;
         VkFence             m_CommandBufferProcessedFence = VK_NULL_HANDLE;
-        bool                m_CommandBufferPending = false;
 
         VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
 
