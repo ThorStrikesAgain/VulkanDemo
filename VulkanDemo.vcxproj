@@ -94,6 +94,11 @@
     <Link>
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)shaders\generate-spirv.bat"
+rmdir /S /Q "$(TargetDir)spirv"
+xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -104,6 +109,11 @@
     <Link>
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)shaders\generate-spirv.bat"
+rmdir /S /Q "$(TargetDir)spirv"
+xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -118,6 +128,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)shaders\generate-spirv.bat"
+rmdir /S /Q "$(TargetDir)spirv"
+xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -132,6 +147,11 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>call "$(ProjectDir)shaders\generate-spirv.bat"
+rmdir /S /Q "$(TargetDir)spirv"
+xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />

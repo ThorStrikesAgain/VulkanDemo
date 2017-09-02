@@ -1,11 +1,17 @@
 @echo off
+setlocal enabledelayedexpansion
 
-if not exist spirv (
-    mkdir spirv
+set scriptDir=%~dp0
+set spirvDir=%scriptDir%spirv
+
+if not exist "%spirvDir%" (
+    mkdir "%spirvDir%"
 )
 
-cd spirv
+cd /D "%spirvDir%"
 for %%f in (..\glsl\*) do (
     "%VULKAN_SDK%\Bin\glslangValidator.exe" -V -o %%~nxf.spv ..\glsl\%%~nxf
+    if !errorlevel! NEQ 0 (
+        exit /b
+    )
 )
-cd ..
