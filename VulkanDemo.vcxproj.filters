@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shader Files">
+      <UniqueIdentifier>{40edd90b-b045-400d-9aad-e45a313d3f6c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -92,5 +95,19 @@
     <ClInclude Include="Configuration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\glsl\blit.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\glsl\blit.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\glsl\const.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\glsl\const.vert">
+      <Filter>Shader Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

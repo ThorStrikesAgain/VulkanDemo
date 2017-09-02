@@ -162,6 +162,12 @@
     <ClInclude Include="Shared.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\glsl\blit.frag" />
+    <None Include="shaders\glsl\blit.vert" />
+    <None Include="shaders\glsl\const.frag" />
+    <None Include="shaders\glsl\const.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
