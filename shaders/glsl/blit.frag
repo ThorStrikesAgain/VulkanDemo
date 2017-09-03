@@ -5,7 +5,7 @@ layout(location = 0) in frag_in
     vec4 uv;
 };
 
-out vec4 color;
+layout(location = 0) out vec4 color;
 
 void main()
 {

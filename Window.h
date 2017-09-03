@@ -10,6 +10,7 @@
 
 namespace VulkanDemo
 {
+    class ConstPipelineGenerator;
     class VulkanManager;
 
     class Window
@@ -30,6 +31,9 @@ namespace VulkanDemo
 
         void CreateRenderPass();
         void DestroyRenderPass();
+
+        void CreatePipeline();
+        void DestroyPipeline();
 
         void CreateFramebuffers();
         void DestroyFramebuffers();
@@ -79,5 +83,8 @@ namespace VulkanDemo
         VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
 
         VkSemaphore         m_LastSceneRenderSemaphore = VK_NULL_HANDLE;
+
+        ConstPipelineGenerator*     m_PipelineGenerator = nullptr;
+        VkPipeline                  m_Pipeline = VK_NULL_HANDLE;
     };
 } // VulkanDemo

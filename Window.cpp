@@ -6,6 +6,8 @@
 #include <array>
 
 #include "Application.h"
+#include "ConstPipelineGenerator.h"
+#include "ShaderLoader.h"
 #include "VulkanManager.h"
 
 namespace VulkanDemo
@@ -28,7 +30,7 @@ namespace VulkanDemo
         }
     }
 
-    Window::Window(int width, int height) : 
+    Window::Window(int width, int height) :
         m_SceneRenderer(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
     {
         assert(width > 0);
@@ -43,9 +45,11 @@ namespace VulkanDemo
         CreateSystemWindow();
         Bind();
         CreateRenderPass();
+        CreatePipeline();
         CreateFramebuffers();
         CreateSynchronization();
         CreateCommandBuffer();
+
     }
 
     Window::~Window()
@@ -54,6 +58,7 @@ namespace VulkanDemo
         DestroyCommandBuffer();
         DestroySynchronization();
         DestroyFramebuffers();
+        DestroyPipeline();
         DestroyRenderPass();
         Unbind();
         DestroySystemWindow();
@@ -295,7 +300,7 @@ namespace VulkanDemo
     {
         // Render the scene.
         SceneRenderResult renderResult;
-        
+
         SceneRenderInfo renderInfo{};
         renderInfo.scene = nullptr;
         renderInfo.width = m_Width;
@@ -420,6 +425,19 @@ namespace VulkanDemo
     {
         vkDestroyRenderPass(m_VulkanManager->GetDevice(), m_RenderPass, NULL);
         m_RenderPass = VK_NULL_HANDLE;
+    }
+
+    void Window::CreatePipeline()
+    {
+        m_PipelineGenerator = new ConstPipelineGenerator(m_RenderPass, 0);
+        m_Pipeline = m_PipelineGenerator->GetPipeline();
+    }
+
+    void Window::DestroyPipeline()
+    {
+        delete m_PipelineGenerator;
+        m_PipelineGenerator = nullptr;
+        m_Pipeline = VK_NULL_HANDLE;
     }
 
     void Window::CreateFramebuffers()
