@@ -162,6 +162,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="SceneRenderer.cpp" />
+    <ClCompile Include="ShaderLoader.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="VulkanManager.cpp" />
     <ClCompile Include="Shared.cpp" />
@@ -177,6 +178,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClInclude Include="Object.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneRenderer.h" />
+    <ClInclude Include="ShaderLoader.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="VulkanManager.h" />
     <ClInclude Include="Shared.h" />
