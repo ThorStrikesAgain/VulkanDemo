@@ -75,7 +75,7 @@ namespace VulkanDemo
                 inputAssemblyState.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
                 inputAssemblyState.pNext = NULL;
                 inputAssemblyState.flags = 0;
-                inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+                inputAssemblyState.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
                 inputAssemblyState.primitiveRestartEnable = VK_FALSE;
             }
 

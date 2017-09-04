@@ -7,6 +7,7 @@
 
 #include "Application.h"
 #include "ConstPipelineGenerator.h"
+#include "GraphicsHelper.h"
 #include "ShaderLoader.h"
 #include "VulkanManager.h"
 
@@ -342,6 +343,36 @@ namespace VulkanDemo
         vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // TODO: Blit...
+        {
+            // Bind the pipeline.
+            vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+
+            // Bind the vertex buffer.
+            VkBuffer vertices = Application::GetInstance().GetGraphicsHelper()->GetBlitVertices();
+            VkDeviceSize offsets = 0;
+            vkCmdBindVertexBuffers(m_CommandBuffer, 0, 1, &vertices, &offsets);
+
+            // Set the viewport.
+            VkViewport viewport{};
+            viewport.x = 0;
+            viewport.y = 0;
+            viewport.width = (float)m_Width;
+            viewport.height = (float)m_Height;
+            viewport.minDepth = 0;
+            viewport.maxDepth = 1;
+            vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport);
+
+            // Set the scissor.
+            VkRect2D scissor{};
+            scissor.offset.x = 0;
+            scissor.offset.y = 0;
+            scissor.extent.width = m_Width;
+            scissor.extent.height = m_Height;
+            vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
+
+            // Draw.
+            vkCmdDraw(m_CommandBuffer, 4, 1, 0, 0);
+        }
 
         vkCmdEndRenderPass(m_CommandBuffer);
 

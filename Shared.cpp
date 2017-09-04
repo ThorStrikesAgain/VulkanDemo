@@ -14,15 +14,9 @@
 
 namespace VulkanDemo
 {
-    VkDeviceMemory AllocateAndBindImageMemory(VkImage image)
+    VkDeviceMemory FindAndAllocateMemory(VkMemoryRequirements const & requirements, VkMemoryPropertyFlags requiredFlags)
     {
-        assert(image != VK_NULL_HANDLE);
-
         VulkanManager * vulkanManager = Application::GetInstance().GetVulkanManager();
-
-        // List the types that can be used for the image.
-        VkMemoryRequirements requirements;
-        vkGetImageMemoryRequirements(vulkanManager->GetDevice(), image, &requirements);
 
         // List the types that support the properties we want.
         VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
@@ -31,12 +25,12 @@ namespace VulkanDemo
         {
             if (((1 << i) & requirements.memoryTypeBits) == 0)
             {
-                // This memory type cannot be used for the image.
+                // This memory type cannot be used based on the requirements.
                 continue;
             }
 
             VkMemoryPropertyFlags flags = physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags;
-            if ((flags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) == 0)
+            if ((flags & requiredFlags) != requiredFlags)
             {
                 // This memory type does not match our requirements.
                 continue;
@@ -50,14 +44,56 @@ namespace VulkanDemo
 
             VkDeviceMemory memory;
             CheckResult(vkAllocateMemory(vulkanManager->GetDevice(), &allocateInfo, NULL, &memory));
-
-            CheckResult(vkBindImageMemory(vulkanManager->GetDevice(), image, memory, 0));
-
             return memory;
         }
 
-        Fail("Failed to find a suitable memory type.", -1);
-        return VK_NULL_HANDLE; // This statement should not be executed.
+        return VK_NULL_HANDLE;
+    }
+
+    VkDeviceMemory AllocateAndBindBufferMemory(VkBuffer buffer)
+    {
+        assert(buffer != VK_NULL_HANDLE);
+
+        VulkanManager * vulkanManager = Application::GetInstance().GetVulkanManager();
+
+        // List the types that can be used for the buffer.
+        VkMemoryRequirements requirements;
+        vkGetBufferMemoryRequirements(vulkanManager->GetDevice(), buffer, &requirements);
+
+        // Allocate memory.
+        VkDeviceMemory memory = FindAndAllocateMemory(
+            requirements, 
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        if (memory == VK_NULL_HANDLE)
+        {
+            Fail("Failed to find a suitable memory type.", -1);
+        }
+
+        // Bind memory.
+        CheckResult(vkBindBufferMemory(vulkanManager->GetDevice(), buffer, memory, 0));
+        return memory;
+    }
+
+    VkDeviceMemory AllocateAndBindImageMemory(VkImage image)
+    {
+        assert(image != VK_NULL_HANDLE);
+
+        VulkanManager * vulkanManager = Application::GetInstance().GetVulkanManager();
+
+        // List the types that can be used for the image.
+        VkMemoryRequirements requirements;
+        vkGetImageMemoryRequirements(vulkanManager->GetDevice(), image, &requirements);
+
+        // Allocate memory.
+        VkDeviceMemory memory = FindAndAllocateMemory(requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        if (memory == VK_NULL_HANDLE)
+        {
+            Fail("Failed to find a suitable memory type.", -1);
+        }
+
+        // Bind memory.
+        CheckResult(vkBindImageMemory(vulkanManager->GetDevice(), image, memory, 0));
+        return memory;
     }
 
 #if BUILD_ENABLE_RUNTIME_DEBUG

@@ -159,6 +159,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstPipelineGenerator.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GraphicsHelper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Scene.cpp" />
@@ -177,6 +178,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="ConstPipelineGenerator.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GraphicsHelper.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneRenderer.h" />

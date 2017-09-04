@@ -1,7 +1,8 @@
 #include "Application.h"
 
-#include "VulkanManager.h"
+#include "GraphicsHelper.h"
 #include "ShaderLoader.h"
+#include "VulkanManager.h"
 
 #include "Window.h"
 
@@ -17,10 +18,14 @@ namespace VulkanDemo
     {
         m_VulkanManager = new VulkanManager();
         m_ShaderLoader = new ShaderLoader();
+        m_GraphicsHelper = new GraphicsHelper();
     }
 
     Application::~Application()
     {
+        delete m_GraphicsHelper;
+        m_GraphicsHelper = nullptr;
+
         delete m_ShaderLoader;
         m_ShaderLoader = nullptr;
 

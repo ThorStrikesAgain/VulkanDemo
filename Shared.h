@@ -9,6 +9,12 @@
 namespace VulkanDemo
 {
     ///
+    /// Allocates device memory for the buffer, and binds it to it. Terminates the application on failure to find a
+    /// suitable memory type or if the allocation or binding operation fails.
+    ///
+    VkDeviceMemory AllocateAndBindBufferMemory(VkBuffer buffer);
+
+    ///
     /// Allocates device memory for the image, and binds it to it. Terminates the application on failure to find a
     /// suitable memory type or if the allocation or binding operation fails.
     ///
