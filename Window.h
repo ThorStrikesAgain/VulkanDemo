@@ -10,7 +10,7 @@
 
 namespace VulkanDemo
 {
-    class ConstPipelineGenerator;
+    class BlitPipelineGenerator;
     class VulkanManager;
 
     class Window
@@ -40,6 +40,9 @@ namespace VulkanDemo
 
         void CreateSynchronization();
         void DestroySynchronization();
+
+        void CreateDescriptorSet();
+        void DestroyDescriptorSet();
 
         void CreateCommandBuffer();
         void DestroyCommandBuffer();
@@ -76,15 +79,17 @@ namespace VulkanDemo
 
         uint32_t            m_NextImageIndex = UINT32_MAX;
 
-        VkSemaphore         m_ImageAcquiredSemaphore = VK_NULL_HANDLE;
-        VkSemaphore         m_ImageRenderedSemaphore = VK_NULL_HANDLE;
+        VkSemaphore         m_ImageAcquiredBeforeBlitSemaphore = VK_NULL_HANDLE;
+        VkSemaphore         m_BlitCompletedBeforePresentSemaphore = VK_NULL_HANDLE;
+        VkSemaphore         m_BlitCompletedBeforeSceneRenderSemaphore = VK_NULL_HANDLE;
+        bool                m_BlitCompletedBeforeSceneRendererSemaphoreUsed = false;
         VkFence             m_CommandBufferProcessedFence = VK_NULL_HANDLE;
 
         VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
 
-        VkSemaphore         m_LastSceneRenderSemaphore = VK_NULL_HANDLE;
+        VkSemaphore         m_SceneRenderedBeforeBlitSemaphore = VK_NULL_HANDLE;
 
-        ConstPipelineGenerator*     m_PipelineGenerator = nullptr;
-        VkPipeline                  m_Pipeline = VK_NULL_HANDLE;
+        BlitPipelineGenerator*      m_PipelineGenerator = nullptr;
+        VkDescriptorSet             m_BlitDescriptorSet = VK_NULL_HANDLE;
     };
 } // VulkanDemo

@@ -18,6 +18,8 @@ namespace VulkanDemo
     struct SceneRenderResult
     {
         VkImage image;
+        VkImageView imageView;
+        VkImageLayout imageLayout;
         VkSemaphore waitSemaphore; // Signaled when the image is ready.
     };
 
@@ -67,6 +69,9 @@ namespace VulkanDemo
 
         VkCommandBuffer m_CommandBuffer = NULL;
 
+        ///
+        /// Semaphore used by the SINGLE user of the renderer to know when the render is complete.
+        ///
         VkSemaphore m_Semaphore = VK_NULL_HANDLE;
         VkFence m_Fence = VK_NULL_HANDLE;
     };

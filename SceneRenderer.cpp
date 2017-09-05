@@ -40,7 +40,7 @@ namespace VulkanDemo
         CheckResult(vkResetFences(m_VulkanManager->GetDevice(), 1, &m_Fence));
 
         UpdateFramebuffer(renderInfo.width, renderInfo.height);
-        
+
         // Compute the command buffer.
         {
             VkCommandBufferBeginInfo commandBufferBeginInfo{};
@@ -105,6 +105,8 @@ namespace VulkanDemo
         }
 
         renderResult.image = m_ForwardColorImage;
+        renderResult.imageView = m_ForwardColorImageView;
+        renderResult.imageLayout = m_ColorLayout;
         renderResult.waitSemaphore = m_Semaphore;
     }
 
@@ -215,7 +217,7 @@ namespace VulkanDemo
             colorImageCreateInfo.arrayLayers = 1;
             colorImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
             colorImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-            colorImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT;
+            colorImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
             colorImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             colorImageCreateInfo.queueFamilyIndexCount = 1;
             colorImageCreateInfo.pQueueFamilyIndices = &graphicsQueueFamilyIndex;
@@ -313,7 +315,7 @@ namespace VulkanDemo
         vkDestroyImageView(m_VulkanManager->GetDevice(), m_ForwardDepthStencilImageView, NULL);
         vkFreeMemory(m_VulkanManager->GetDevice(), m_ForwardDepthStencilMemory, NULL);
         vkDestroyImage(m_VulkanManager->GetDevice(), m_ForwardDepthStencilImage, NULL);
-        
+
         vkDestroyImageView(m_VulkanManager->GetDevice(), m_ForwardColorImageView, NULL);
         vkFreeMemory(m_VulkanManager->GetDevice(), m_ForwardColorMemory, NULL);
         vkDestroyImage(m_VulkanManager->GetDevice(), m_ForwardColorImage, NULL);

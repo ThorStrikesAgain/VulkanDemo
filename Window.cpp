@@ -6,7 +6,7 @@
 #include <array>
 
 #include "Application.h"
-#include "ConstPipelineGenerator.h"
+#include "BlitPipelineGenerator.h"
 #include "GraphicsHelper.h"
 #include "ShaderLoader.h"
 #include "VulkanManager.h"
@@ -49,14 +49,15 @@ namespace VulkanDemo
         CreatePipeline();
         CreateFramebuffers();
         CreateSynchronization();
+        CreateDescriptorSet();
         CreateCommandBuffer();
-
     }
 
     Window::~Window()
     {
         WaitForCommandBuffer();
         DestroyCommandBuffer();
+        DestroyDescriptorSet();
         DestroySynchronization();
         DestroyFramebuffers();
         DestroyPipeline();
@@ -201,7 +202,7 @@ namespace VulkanDemo
         std::vector<VkSurfaceFormatKHR> supportedSurfaceFormats{ supportedSurfaceFormatsCount };
         CheckResult(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_Surface, &supportedSurfaceFormatsCount, supportedSurfaceFormats.data()));
 
-        // Select a surface format.
+        // Select a surface format
         m_Format.format = VK_FORMAT_B8G8R8_UNORM;
         m_Format.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
         for (auto const & supportedSurfaceFormat : supportedSurfaceFormats)
@@ -289,6 +290,7 @@ namespace VulkanDemo
         {
             vkDestroyImageView(m_VulkanManager->GetDevice(), m_ImageViews[i], NULL);
         }
+        m_ImageViews.clear();
 
         vkDestroySwapchainKHR(m_VulkanManager->GetDevice(), m_Swapchain, NULL);
         m_Swapchain = VK_NULL_HANDLE;
@@ -306,12 +308,13 @@ namespace VulkanDemo
         renderInfo.scene = nullptr;
         renderInfo.width = m_Width;
         renderInfo.height = m_Height;
-        renderInfo.waitSemaphore = m_LastSceneRenderSemaphore;
+        renderInfo.waitSemaphore = // TODO: We need a texture-usage book keeping mechanism.
+            m_BlitCompletedBeforeSceneRendererSemaphoreUsed ? m_BlitCompletedBeforeSceneRenderSemaphore : VK_NULL_HANDLE;
         m_SceneRenderer.Render(renderInfo, renderResult);
-        m_LastSceneRenderSemaphore = renderResult.waitSemaphore;
+        m_SceneRenderedBeforeBlitSemaphore = renderResult.waitSemaphore;
 
         // Copy to the window.
-        CheckResult(vkAcquireNextImageKHR(m_VulkanManager->GetDevice(), m_Swapchain, UINT64_MAX, m_ImageAcquiredSemaphore, VK_NULL_HANDLE, &m_NextImageIndex));
+        CheckResult(vkAcquireNextImageKHR(m_VulkanManager->GetDevice(), m_Swapchain, UINT64_MAX, m_ImageAcquiredBeforeBlitSemaphore, VK_NULL_HANDLE, &m_NextImageIndex));
 
         VkCommandBufferBeginInfo commandBufferBeginInfo{};
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -322,8 +325,9 @@ namespace VulkanDemo
         // TODO: Use the right component based on the format.
         VkClearValue clearValue{};
         clearValue.color.float32[0] = 0;
-        clearValue.color.float32[1] = 1.0f;
+        clearValue.color.float32[1] = 0;
         clearValue.color.float32[2] = 0;
+        clearValue.color.float32[3] = 1;
 
         VkRenderPassBeginInfo renderPassBeginInfo{};
         renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -342,10 +346,35 @@ namespace VulkanDemo
 
         vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        // TODO: Blit...
+        // Blit
         {
             // Bind the pipeline.
-            vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+            vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineGenerator->GetPipeline());
+
+            // Update the descriptor set for the blit operation.
+            {
+                VkDescriptorImageInfo imageInfo{};
+                imageInfo.sampler = VK_NULL_HANDLE; // We use an immutable sampler.
+                imageInfo.imageView = renderResult.imageView;
+                imageInfo.imageLayout = renderResult.imageLayout; // Assigned by the scene render constructor.
+
+                VkWriteDescriptorSet writeDescriptorSet{};
+                writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                writeDescriptorSet.pNext = NULL;
+                writeDescriptorSet.dstSet = m_BlitDescriptorSet;
+                writeDescriptorSet.dstBinding = 0;
+                writeDescriptorSet.dstArrayElement = 0;
+                writeDescriptorSet.descriptorCount = 1;
+                writeDescriptorSet.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                writeDescriptorSet.pImageInfo = &imageInfo;
+                writeDescriptorSet.pBufferInfo = NULL;
+                writeDescriptorSet.pTexelBufferView = NULL;
+
+                vkUpdateDescriptorSets(m_VulkanManager->GetDevice(), 1, &writeDescriptorSet, 0, NULL);
+            }
+
+            // Bind the descriptor set.
+            vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineGenerator->GetPipelineLayout(), 0, 1, &m_BlitDescriptorSet, 0, NULL);
 
             // Bind the vertex buffer.
             VkBuffer vertices = Application::GetInstance().GetGraphicsHelper()->GetBlitVertices();
@@ -378,18 +407,38 @@ namespace VulkanDemo
 
         CheckResult(vkEndCommandBuffer(m_CommandBuffer));
 
-        VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        std::array<VkSemaphore, 2> semaphoresToWait =
+        {
+            m_ImageAcquiredBeforeBlitSemaphore,
+            m_SceneRenderedBeforeBlitSemaphore
+        };
+
+        std::array<VkPipelineStageFlags, 2> semaphoresToWaitMask =
+        {
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
+        };
+
+        std::array<VkSemaphore, 2> semaphoresToSignal =
+        {
+            m_BlitCompletedBeforePresentSemaphore,
+            m_BlitCompletedBeforeSceneRenderSemaphore
+        };
+
+        assert(semaphoresToWait.size() == semaphoresToWaitMask.size());
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.pNext = NULL;
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &m_ImageAcquiredSemaphore;
-        submitInfo.pWaitDstStageMask = &waitDstStageMask;
+        submitInfo.waitSemaphoreCount = (uint32_t)semaphoresToWait.size();
+        submitInfo.pWaitSemaphores = semaphoresToWait.data();
+        submitInfo.pWaitDstStageMask = semaphoresToWaitMask.data();
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &m_CommandBuffer;
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &m_ImageRenderedSemaphore;
+        submitInfo.signalSemaphoreCount = (uint32_t)semaphoresToSignal.size();
+        submitInfo.pSignalSemaphores = semaphoresToSignal.data();
+
+        m_BlitCompletedBeforeSceneRendererSemaphoreUsed = true;
 
         CheckResult(vkQueueSubmit(m_VulkanManager->GetGraphicsQueue(), 1, &submitInfo, m_CommandBufferProcessedFence));
 
@@ -399,7 +448,7 @@ namespace VulkanDemo
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.pNext = NULL;
         presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = &m_ImageRenderedSemaphore;
+        presentInfo.pWaitSemaphores = &m_BlitCompletedBeforePresentSemaphore;
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = &swapchain;
         presentInfo.pImageIndices = &m_NextImageIndex;
@@ -460,15 +509,13 @@ namespace VulkanDemo
 
     void Window::CreatePipeline()
     {
-        m_PipelineGenerator = new ConstPipelineGenerator(m_RenderPass, 0);
-        m_Pipeline = m_PipelineGenerator->GetPipeline();
+        m_PipelineGenerator = new BlitPipelineGenerator(m_RenderPass, 0);
     }
 
     void Window::DestroyPipeline()
     {
         delete m_PipelineGenerator;
         m_PipelineGenerator = nullptr;
-        m_Pipeline = VK_NULL_HANDLE;
     }
 
     void Window::CreateFramebuffers()
@@ -505,13 +552,14 @@ namespace VulkanDemo
 
     void Window::CreateSynchronization()
     {
-        // Create a semaphore used to ensure that the command buffer waits for the image to actually be acquired.
         VkSemaphoreCreateInfo semaphoreCreateInfo{};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
         semaphoreCreateInfo.pNext = NULL;
         semaphoreCreateInfo.flags = 0;
-        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageAcquiredSemaphore));
-        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageRenderedSemaphore));
+
+        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageAcquiredBeforeBlitSemaphore));
+        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_BlitCompletedBeforePresentSemaphore));
+        CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_BlitCompletedBeforeSceneRenderSemaphore));
 
         VkFenceCreateInfo fenceCreateInfo{};
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -523,9 +571,38 @@ namespace VulkanDemo
     void Window::DestroySynchronization()
     {
         // TODO: Wait for stuff to become idle.
-        vkDestroyFence(m_VulkanManager->GetDevice(), m_CommandBufferProcessedFence, NULL);
-        vkDestroySemaphore(m_VulkanManager->GetDevice(), m_ImageRenderedSemaphore, NULL);
-        vkDestroySemaphore(m_VulkanManager->GetDevice(), m_ImageAcquiredSemaphore, NULL);
+        VkDevice device = m_VulkanManager->GetDevice();
+
+        vkDestroyFence(device, m_CommandBufferProcessedFence, NULL);
+        m_CommandBufferProcessedFence = VK_NULL_HANDLE;
+
+        vkDestroySemaphore(device, m_BlitCompletedBeforePresentSemaphore, NULL);
+        m_BlitCompletedBeforePresentSemaphore = VK_NULL_HANDLE;
+
+        vkDestroySemaphore(device, m_ImageAcquiredBeforeBlitSemaphore, NULL);
+        m_ImageAcquiredBeforeBlitSemaphore = VK_NULL_HANDLE;
+
+        vkDestroySemaphore(device, m_BlitCompletedBeforeSceneRenderSemaphore, NULL);
+        m_BlitCompletedBeforeSceneRenderSemaphore = VK_NULL_HANDLE;
+    }
+
+    void Window::CreateDescriptorSet()
+    {
+        VkDescriptorSetLayout descriptorSetLayout = m_PipelineGenerator->GetDescriptorSetLayout();
+
+        VkDescriptorSetAllocateInfo descriptorSetAllocInfo{};
+        descriptorSetAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        descriptorSetAllocInfo.pNext = NULL;
+        descriptorSetAllocInfo.descriptorPool = m_VulkanManager->GetDescriptorPool();
+        descriptorSetAllocInfo.descriptorSetCount = 1;
+        descriptorSetAllocInfo.pSetLayouts = &descriptorSetLayout;
+
+        CheckResult(vkAllocateDescriptorSets(m_VulkanManager->GetDevice(), &descriptorSetAllocInfo, &m_BlitDescriptorSet));
+    }
+
+    void Window::DestroyDescriptorSet()
+    {
+        CheckResult(vkFreeDescriptorSets(m_VulkanManager->GetDevice(), m_VulkanManager->GetDescriptorPool(), 1, &m_BlitDescriptorSet));
     }
 
     void Window::CreateCommandBuffer()

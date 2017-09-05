@@ -155,6 +155,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="BlitPipelineGenerator.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstPipelineGenerator.cpp" />
@@ -172,6 +173,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="BlitPipelineGenerator.h" />
     <ClInclude Include="BUILD_OPTIONS.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Component.h" />
