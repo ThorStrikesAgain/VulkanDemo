@@ -50,13 +50,13 @@ namespace VulkanDemo
             commandBufferBeginInfo.pInheritanceInfo = NULL;
             CheckResult(vkBeginCommandBuffer(m_CommandBuffer, &commandBufferBeginInfo));
 
-            VkClearValue clearValue{};
-            clearValue.color.float32[0] = 0.0f;
-            clearValue.color.float32[1] = 0.0f;
-            clearValue.color.float32[2] = 1.0f;
-            clearValue.color.float32[3] = 1.0f;
-            clearValue.depthStencil.depth = 1.0f;
-            clearValue.depthStencil.stencil = 0;
+            std::array<VkClearValue, 2> clearValues;
+            clearValues[0].color.float32[0] = 1;
+            clearValues[0].color.float32[1] = 1;
+            clearValues[0].color.float32[2] = 1;
+            clearValues[0].color.float32[3] = 1;
+            clearValues[1].depthStencil.depth = 1.0f;
+            clearValues[1].depthStencil.stencil = 0;
 
             VkRenderPassBeginInfo renderPassBeginInfo{};
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -67,8 +67,8 @@ namespace VulkanDemo
             renderPassBeginInfo.renderArea.extent.height = m_Height;
             renderPassBeginInfo.renderArea.offset.x = 0;
             renderPassBeginInfo.renderArea.offset.y = 0;
-            renderPassBeginInfo.clearValueCount = 2;
-            renderPassBeginInfo.pClearValues = &clearValue;
+            renderPassBeginInfo.clearValueCount = (uint32_t)clearValues.size();
+            renderPassBeginInfo.pClearValues = clearValues.data();
             vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
             // TODO: Render the objects according to the camera.
