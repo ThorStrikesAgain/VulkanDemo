@@ -116,10 +116,10 @@ namespace VulkanDemo
 
     VkShaderModule ShaderLoader::GetBlitFrag()
     {
-        if (blitVertModule == VK_NULL_HANDLE)
+        if (blitFragModule == VK_NULL_HANDLE)
         {
-            blitVertModule = LoadShaderModule("blit.frag");
+            blitFragModule = LoadShaderModule("blit.frag");
         }
-        return blitVertModule;
+        return blitFragModule;
     }
 }
