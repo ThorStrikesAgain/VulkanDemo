@@ -4,11 +4,11 @@ layout(location = 0) in vec4 pos;
 
 layout(location = 0) out vert_out
 {
-    vec4 uv;
+    vec2 st;
 };
 
 void main()
 {
     gl_Position = pos;
-    uv = (pos + 1) * 0.5;
+    st = (pos.xy + 1) * 0.5;
 }

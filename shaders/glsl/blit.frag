@@ -1,14 +1,15 @@
 #version 450 core
 
+layout(set=0, binding=0) uniform sampler2D inputSampler;
+
 layout(location = 0) in frag_in
 {
-    vec4 uv;
+    vec2 st;
 };
 
 layout(location = 0) out vec4 color;
 
 void main()
 {
-    // TODO: Actually blit from a texture instead of outputting a constant...
-    color = vec4(1, 1, 0, 1);
+    color = vec4(texture(inputSampler, st).rgb, 0);
 }
