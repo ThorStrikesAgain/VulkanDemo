@@ -33,10 +33,10 @@ namespace VulkanDemo
 
             float vertices[4][4] =
             {
-                { -1, 1, 0, 1 },
-                {  1, 1, 0, 1 },
+                { -1,  1, 0, 1 },
+                {  1,  1, 0, 1 },
                 { -1, -1, 0, 1 },
-                {  1,  -1, 0, 1 }
+                {  1, -1, 0, 1 }
             };
 
             // Create the buffer.
@@ -50,7 +50,7 @@ namespace VulkanDemo
             bufferCreateInfo.queueFamilyIndexCount = 0;
             bufferCreateInfo.pQueueFamilyIndices = nullptr;
             CheckResult(vkCreateBuffer(device, &bufferCreateInfo, NULL, &m_blitVertices));
-            
+
             // Allocate and bind memory.
             m_blitVerticesMemory = AllocateAndBindBufferMemory(m_blitVertices);
 

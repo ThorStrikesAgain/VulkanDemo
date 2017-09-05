@@ -62,7 +62,7 @@ namespace VulkanDemo
 
         // Allocate memory.
         VkDeviceMemory memory = FindAndAllocateMemory(
-            requirements, 
+            requirements,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         if (memory == VK_NULL_HANDLE)
         {
