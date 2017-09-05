@@ -21,10 +21,12 @@ namespace VulkanDemo
         SelectPhysicalDevice();
         CreateDevice();
         CreateCommandPools();
+        CreateDescriptorPools();
     }
 
     VulkanManager::~VulkanManager()
     {
+        DestroyDescriptorPools();
         DestroyCommandPools();
         DestroyDevice();
         DeselectPhysicalDevice();
@@ -153,6 +155,32 @@ namespace VulkanDemo
     void VulkanManager::DestroyCommandPools()
     {
         vkDestroyCommandPool(m_Device, m_GraphicsCommandPool, NULL);
+        m_GraphicsCommandPool = VK_NULL_HANDLE;
+    }
+
+    void VulkanManager::CreateDescriptorPools()
+    {
+        std::array<VkDescriptorPoolSize, 1> poolSizes;
+
+        // TODO: Make this configurable.
+        poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        poolSizes[0].descriptorCount = 10;
+
+        VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
+        descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        descriptorPoolCreateInfo.pNext = NULL;
+        descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+        descriptorPoolCreateInfo.maxSets = 10;
+        descriptorPoolCreateInfo.poolSizeCount = (uint32_t)poolSizes.size();
+        descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
+
+        CheckResult(vkCreateDescriptorPool(m_Device, &descriptorPoolCreateInfo, NULL, &m_DescriptorPool));
+    }
+
+    void VulkanManager::DestroyDescriptorPools()
+    {
+        vkDestroyDescriptorPool(m_Device, m_DescriptorPool, NULL);
+        m_DescriptorPool = VK_NULL_HANDLE;
     }
 
     void VulkanManager::DisplayAvailableInstanceLayers()

@@ -20,6 +20,8 @@ namespace VulkanDemo
         inline VkQueue              GetGraphicsQueue() const{ return m_GraphicsQueue; }
 
         inline VkCommandPool        GetGraphicsCommandPool() const { return m_GraphicsCommandPool; }
+        
+        inline VkDescriptorPool     GetDescriptorPool() const { return m_DescriptorPool; }
 
     private:
         void CreateInstance();
@@ -33,6 +35,9 @@ namespace VulkanDemo
 
         void CreateCommandPools();
         void DestroyCommandPools();
+
+        void CreateDescriptorPools();
+        void DestroyDescriptorPools();
 
         void DisplayAvailableInstanceLayers();
         void DisplayAvailableInstanceExtensions();
@@ -69,5 +74,8 @@ namespace VulkanDemo
 
         // Command Pools
         VkCommandPool   m_GraphicsCommandPool = VK_NULL_HANDLE;
+
+        // Descriptor Pools
+        VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
     };
 } // VulkanDemo
