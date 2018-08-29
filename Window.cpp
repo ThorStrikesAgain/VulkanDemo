@@ -319,7 +319,7 @@ namespace VulkanDemo
         VkCommandBufferBeginInfo commandBufferBeginInfo{};
         commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         commandBufferBeginInfo.pNext = NULL;
-        commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+        commandBufferBeginInfo.flags = 0;
         commandBufferBeginInfo.pInheritanceInfo = NULL;
 
         // TODO: Use the right component based on the format.
