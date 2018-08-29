@@ -33,6 +33,7 @@ namespace VulkanDemo
 
         m_VulkanManager = nullptr;
     }
+
     void SceneRenderer::Render(const SceneRenderInfo & renderInfo, SceneRenderResult & renderResult)
     {
         // Wait for the command buffer to leave the pending state.
