@@ -23,6 +23,24 @@ namespace VulkanDemo
         void Render();
 
     private:
+        class CommandBufferPool
+        {
+        public:
+            CommandBufferPool(int size);
+            ~CommandBufferPool();
+
+            void GetNextAvailable(VkCommandBuffer* commandBuffer, VkFence* fence);
+
+        private:
+            VulkanManager*               m_VulkanManager = nullptr;
+
+            std::vector<VkCommandBuffer> m_CommandBuffers;
+            std::vector<VkFence>         m_Fences;
+
+            int m_Size = 0;
+            int m_Current = 0;
+        };
+
         void CreateSystemWindow();
         void DestroySystemWindow();
 
@@ -43,11 +61,6 @@ namespace VulkanDemo
 
         void CreateDescriptorSet();
         void DestroyDescriptorSet();
-
-        void CreateCommandBuffer();
-        void DestroyCommandBuffer();
-
-        void WaitForCommandBuffer();
 
         static LRESULT CALLBACK WindowProc(
             HWND   hwnd,
@@ -71,6 +84,7 @@ namespace VulkanDemo
         VkSwapchainKHR              m_Swapchain = VK_NULL_HANDLE;
         std::vector<VkImage>        m_Images;
         std::vector<VkImageView>    m_ImageViews;
+        uint32_t                    m_ImageCount = 0;
 
         VkSurfaceCapabilitiesKHR    m_SurfaceCapabilities{};
 
@@ -83,13 +97,13 @@ namespace VulkanDemo
         VkSemaphore         m_BlitCompletedBeforePresentSemaphore = VK_NULL_HANDLE;
         VkSemaphore         m_BlitCompletedBeforeSceneRenderSemaphore = VK_NULL_HANDLE;
         bool                m_BlitCompletedBeforeSceneRendererSemaphoreUsed = false;
-        VkFence             m_CommandBufferProcessedFence = VK_NULL_HANDLE;
 
-        VkCommandBuffer     m_CommandBuffer = VK_NULL_HANDLE;
 
         VkSemaphore         m_SceneRenderedBeforeBlitSemaphore = VK_NULL_HANDLE;
 
         BlitPipelineGenerator*      m_PipelineGenerator = nullptr;
         VkDescriptorSet             m_BlitDescriptorSet = VK_NULL_HANDLE;
+
+        CommandBufferPool*          m_CommandBufferPool = nullptr;
     };
 } // VulkanDemo

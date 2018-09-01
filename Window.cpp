@@ -50,13 +50,15 @@ namespace VulkanDemo
         CreateFramebuffers();
         CreateSynchronization();
         CreateDescriptorSet();
-        CreateCommandBuffer();
+
+        m_CommandBufferPool = new CommandBufferPool(m_ImageCount + 1);
     }
 
     Window::~Window()
     {
-        WaitForCommandBuffer();
-        DestroyCommandBuffer();
+        delete m_CommandBufferPool;
+        m_CommandBufferPool = nullptr;
+
         DestroyDescriptorSet();
         DestroySynchronization();
         DestroyFramebuffers();
@@ -255,14 +257,13 @@ namespace VulkanDemo
         CheckResult(vkCreateSwapchainKHR(m_VulkanManager->GetDevice(), &swapchainCreateInfo, NULL, &m_Swapchain));
 
         // Get the images.
-        uint32_t imagesCount;
-        CheckResult(vkGetSwapchainImagesKHR(m_VulkanManager->GetDevice(), m_Swapchain, &imagesCount, NULL));
-        m_Images.resize(imagesCount);
-        CheckResult(vkGetSwapchainImagesKHR(m_VulkanManager->GetDevice(), m_Swapchain, &imagesCount, m_Images.data()));
+        CheckResult(vkGetSwapchainImagesKHR(m_VulkanManager->GetDevice(), m_Swapchain, &m_ImageCount, NULL));
+        m_Images.resize(m_ImageCount);
+        CheckResult(vkGetSwapchainImagesKHR(m_VulkanManager->GetDevice(), m_Swapchain, &m_ImageCount, m_Images.data()));
 
         // Create the corresponding image views.
-        m_ImageViews.resize(imagesCount);
-        for (uint32_t i = 0; i < imagesCount; ++i)
+        m_ImageViews.resize(m_ImageCount);
+        for (uint32_t i = 0; i < m_ImageCount; ++i)
         {
             VkImageViewCreateInfo imageViewCreateInfo{};
             imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -286,7 +287,7 @@ namespace VulkanDemo
 
     void Window::Unbind()
     {
-        for (int i = 0; i < m_ImageViews.size(); ++i)
+        for (uint32_t i = 0; i < m_ImageCount; ++i)
         {
             vkDestroyImageView(m_VulkanManager->GetDevice(), m_ImageViews[i], NULL);
         }
@@ -297,6 +298,8 @@ namespace VulkanDemo
 
         vkDestroySurfaceKHR(m_VulkanManager->GetInstance(), m_Surface, NULL);
         m_Surface = VK_NULL_HANDLE;
+
+        m_ImageCount = 0;
     }
 
     void Window::Render()
@@ -338,18 +341,18 @@ namespace VulkanDemo
         renderPassBeginInfo.clearValueCount = 1;
         renderPassBeginInfo.pClearValues = &clearValue;
 
-        // Wait and reset the fence if need be, since we only use one command buffer.
-        // TODO: Use multiple command buffers.
-        WaitForCommandBuffer();
+        VkCommandBuffer commandBuffer;
+        VkFence commandBufferFence;
+        m_CommandBufferPool->GetNextAvailable(&commandBuffer, &commandBufferFence);
 
-        CheckResult(vkBeginCommandBuffer(m_CommandBuffer, &commandBufferBeginInfo));
+        CheckResult(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 
-        vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // Blit
         {
             // Bind the pipeline.
-            vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineGenerator->GetPipeline());
+            vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineGenerator->GetPipeline());
 
             // Update the descriptor set for the blit operation.
             {
@@ -374,12 +377,12 @@ namespace VulkanDemo
             }
 
             // Bind the descriptor set.
-            vkCmdBindDescriptorSets(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineGenerator->GetPipelineLayout(), 0, 1, &m_BlitDescriptorSet, 0, NULL);
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineGenerator->GetPipelineLayout(), 0, 1, &m_BlitDescriptorSet, 0, NULL);
 
             // Bind the vertex buffer.
             VkBuffer vertices = Application::GetInstance().GetGraphicsHelper()->GetBlitVertices();
             VkDeviceSize offsets = 0;
-            vkCmdBindVertexBuffers(m_CommandBuffer, 0, 1, &vertices, &offsets);
+            vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertices, &offsets);
 
             // Set the viewport.
             VkViewport viewport{};
@@ -389,7 +392,7 @@ namespace VulkanDemo
             viewport.height = (float)m_Height;
             viewport.minDepth = 0;
             viewport.maxDepth = 1;
-            vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport);
+            vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
             // Set the scissor.
             VkRect2D scissor{};
@@ -397,15 +400,15 @@ namespace VulkanDemo
             scissor.offset.y = 0;
             scissor.extent.width = m_Width;
             scissor.extent.height = m_Height;
-            vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
+            vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
             // Draw.
-            vkCmdDraw(m_CommandBuffer, 4, 1, 0, 0);
+            vkCmdDraw(commandBuffer, 4, 1, 0, 0);
         }
 
-        vkCmdEndRenderPass(m_CommandBuffer);
+        vkCmdEndRenderPass(commandBuffer);
 
-        CheckResult(vkEndCommandBuffer(m_CommandBuffer));
+        CheckResult(vkEndCommandBuffer(commandBuffer));
 
         std::array<VkSemaphore, 2> semaphoresToWait =
         {
@@ -434,13 +437,13 @@ namespace VulkanDemo
         submitInfo.pWaitSemaphores = semaphoresToWait.data();
         submitInfo.pWaitDstStageMask = semaphoresToWaitMask.data();
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &m_CommandBuffer;
+        submitInfo.pCommandBuffers = &commandBuffer;
         submitInfo.signalSemaphoreCount = (uint32_t)semaphoresToSignal.size();
         submitInfo.pSignalSemaphores = semaphoresToSignal.data();
 
         m_BlitCompletedBeforeSceneRendererSemaphoreUsed = true;
 
-        CheckResult(vkQueueSubmit(m_VulkanManager->GetGraphicsQueue(), 1, &submitInfo, m_CommandBufferProcessedFence));
+        CheckResult(vkQueueSubmit(m_VulkanManager->GetGraphicsQueue(), 1, &submitInfo, commandBufferFence));
 
         VkSwapchainKHR swapchain = m_Swapchain;
         VkResult result;
@@ -524,8 +527,8 @@ namespace VulkanDemo
         const std::vector<VkImageView> & imageViews = m_ImageViews;
         const VkSurfaceCapabilitiesKHR & surfaceCapabilities = m_SurfaceCapabilities;
 
-        m_FrameBuffers.resize(imageViews.size());
-        for (int i = 0; i < m_FrameBuffers.size(); ++i)
+        m_FrameBuffers.resize(m_ImageCount);
+        for (uint32_t i = 0; i < m_ImageCount; ++i)
         {
             VkFramebufferCreateInfo framebufferCreateInfo{};
             framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -543,7 +546,7 @@ namespace VulkanDemo
 
     void Window::DestroyFramebuffers()
     {
-        for (int i = 0; i < m_FrameBuffers.size(); ++i)
+        for (uint32_t i = 0; i < m_ImageCount; ++i)
         {
             vkDestroyFramebuffer(m_VulkanManager->GetDevice(), m_FrameBuffers[i], NULL);
         }
@@ -560,21 +563,12 @@ namespace VulkanDemo
         CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_ImageAcquiredBeforeBlitSemaphore));
         CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_BlitCompletedBeforePresentSemaphore));
         CheckResult(vkCreateSemaphore(m_VulkanManager->GetDevice(), &semaphoreCreateInfo, NULL, &m_BlitCompletedBeforeSceneRenderSemaphore));
-
-        VkFenceCreateInfo fenceCreateInfo{};
-        fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-        fenceCreateInfo.pNext = NULL;
-        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-        CheckResult(vkCreateFence(m_VulkanManager->GetDevice(), &fenceCreateInfo, NULL, &m_CommandBufferProcessedFence));
     }
 
     void Window::DestroySynchronization()
     {
         // TODO: Wait for stuff to become idle.
         VkDevice device = m_VulkanManager->GetDevice();
-
-        vkDestroyFence(device, m_CommandBufferProcessedFence, NULL);
-        m_CommandBufferProcessedFence = VK_NULL_HANDLE;
 
         vkDestroySemaphore(device, m_BlitCompletedBeforePresentSemaphore, NULL);
         m_BlitCompletedBeforePresentSemaphore = VK_NULL_HANDLE;
@@ -605,26 +599,58 @@ namespace VulkanDemo
         CheckResult(vkFreeDescriptorSets(m_VulkanManager->GetDevice(), m_VulkanManager->GetDescriptorPool(), 1, &m_BlitDescriptorSet));
     }
 
-    void Window::CreateCommandBuffer()
+    Window::CommandBufferPool::CommandBufferPool(int size)
     {
+        m_Size = size;
+        m_CommandBuffers.resize(size);
+        m_Fences.resize(size);
+
+        m_VulkanManager = Application::GetInstance().GetVulkanManager();
+
         VkCommandBufferAllocateInfo commandBufferAllocateInfo{};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.pNext = NULL;
         commandBufferAllocateInfo.commandPool = m_VulkanManager->GetGraphicsCommandPool();
         commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        commandBufferAllocateInfo.commandBufferCount = 1;
-        CheckResult(vkAllocateCommandBuffers(m_VulkanManager->GetDevice(), &commandBufferAllocateInfo, &m_CommandBuffer));
+        commandBufferAllocateInfo.commandBufferCount = size;
+        CheckResult(vkAllocateCommandBuffers(m_VulkanManager->GetDevice(), &commandBufferAllocateInfo, m_CommandBuffers.data()));
+        
+        VkFenceCreateInfo fenceCreateInfo{};
+        fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceCreateInfo.pNext = NULL;
+        fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        for(int i = 0 ; i < size ; ++i)
+        {
+            CheckResult(vkCreateFence(m_VulkanManager->GetDevice(), &fenceCreateInfo, NULL, &m_Fences[i]));
+        }
     }
 
-    void Window::DestroyCommandBuffer()
+    Window::CommandBufferPool::~CommandBufferPool()
     {
-        vkFreeCommandBuffers(m_VulkanManager->GetDevice(), m_VulkanManager->GetGraphicsCommandPool(), 1, &m_CommandBuffer);
-        m_CommandBuffer = VK_NULL_HANDLE;
+        VkDevice device = m_VulkanManager->GetDevice();
+
+        for (int i = 0; i < m_Size; ++i)
+        {
+            CheckResult(vkWaitForFences(device, 1, &m_Fences[i], VK_TRUE, UINT64_MAX));
+            vkDestroyFence(device, m_Fences[i], NULL);
+        }
+        m_Fences.clear();
+
+        vkFreeCommandBuffers(device, m_VulkanManager->GetGraphicsCommandPool(), m_Size, m_CommandBuffers.data());
+        m_CommandBuffers.clear();
     }
 
-    void Window::WaitForCommandBuffer()
+    void Window::CommandBufferPool::GetNextAvailable(VkCommandBuffer* commandBuffer, VkFence* fence)
     {
-        CheckResult(vkWaitForFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence, VK_TRUE, UINT64_MAX));
-        CheckResult(vkResetFences(m_VulkanManager->GetDevice(), 1, &m_CommandBufferProcessedFence));
+        VkDevice device = m_VulkanManager->GetDevice();
+
+        // Simple LRU.
+        CheckResult(vkWaitForFences(device, 1, &m_Fences[m_Current], VK_TRUE, UINT64_MAX));
+        CheckResult(vkResetFences(device, 1, &m_Fences[m_Current]));
+
+        *commandBuffer = m_CommandBuffers[m_Current];
+        *fence = m_Fences[m_Current];
+
+        m_Current = (m_Current + 1) % m_Size;
     }
 } // VulkanDemo
