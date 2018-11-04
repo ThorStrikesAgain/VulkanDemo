@@ -11,7 +11,7 @@ namespace VulkanDemo
     {
         auto error = FT_Init_FreeType(&m_Library);
         if (error)
-            Fail("Failed to initialize freetype", -1);
+            Fail("Failed to initialize freetype");
     }
 
     FontManager::~FontManager()
@@ -20,7 +20,7 @@ namespace VulkanDemo
 
         auto error = FT_Done_FreeType(m_Library);
         if (error)
-            Fail("Failed to destroy freetype", -1);
+            Fail("Failed to destroy freetype");
     }
 
     void FontManager::LoadDefaultFonts()

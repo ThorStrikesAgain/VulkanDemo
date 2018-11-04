@@ -282,7 +282,7 @@ namespace VulkanDemo
 
         if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
         {
-            Fail(stream.str().c_str(), -1);
+            Fail(stream.str().c_str());
         }
 
         return false;

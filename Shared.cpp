@@ -66,7 +66,7 @@ namespace VulkanDemo
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
         if (memory == VK_NULL_HANDLE)
         {
-            Fail("Failed to find a suitable memory type.", -1);
+            Fail("Failed to find a suitable memory type.");
         }
 
         // Bind memory.
@@ -88,7 +88,7 @@ namespace VulkanDemo
         VkDeviceMemory memory = FindAndAllocateMemory(requirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         if (memory == VK_NULL_HANDLE)
         {
-            Fail("Failed to find a suitable memory type.", -1);
+            Fail("Failed to find a suitable memory type.");
         }
 
         // Bind memory.
@@ -167,7 +167,7 @@ namespace VulkanDemo
                 break;
             }
 
-            Fail("A Vulkan runtime error has occurred.", -1);
+            Fail("A Vulkan runtime error has occurred.");
         }
     }
 

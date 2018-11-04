@@ -34,7 +34,7 @@ namespace VulkanDemo
         file.open(path, std::ios::in | std::ios::binary);
         if (!file.is_open())
         {
-            Fail("Failed to open the file.", -1);
+            Fail("Failed to open the file.");
         }
 
         // Get the length.
@@ -42,7 +42,7 @@ namespace VulkanDemo
         auto length = (size_t)file.gcount();
         if (length % sizeof(T) > 0)
         {
-            Fail("The size of the file is not a multiple of the size of the underlying type.", -1);
+            Fail("The size of the file is not a multiple of the size of the underlying type.");
         }
 
         // Reset to the beginning.
@@ -69,7 +69,7 @@ namespace VulkanDemo
         if (code[0] != 0x07230203)
         {
             // TODO: Support reversed endianness.
-            Fail("SPIR-V magic number is incorrect.", -1);
+            Fail("SPIR-V magic number is incorrect.");
         }
 
         VkShaderModuleCreateInfo shaderModuleCreateInfo{};

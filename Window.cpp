@@ -167,7 +167,7 @@ namespace VulkanDemo
         );
         if (!queueFamilyCanPresentToWindows)
         {
-            Fail("The selected graphics queue family doesn't support presentation to the Microsoft Windows desktop", -1);
+            Fail("The selected graphics queue family doesn't support presentation to the Microsoft Windows desktop");
         }
 
         // Create the surface.
@@ -184,7 +184,7 @@ namespace VulkanDemo
         CheckResult(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamily, m_Surface, &wsiSupported));
         if (!wsiSupported)
         {
-            Fail("The selected graphics queue family doesn't support presentation to the specified surface", -1);
+            Fail("The selected graphics queue family doesn't support presentation to the specified surface");
         }
 
         // Get the supported surface capabilities.

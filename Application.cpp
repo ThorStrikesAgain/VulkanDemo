@@ -43,7 +43,7 @@ namespace VulkanDemo
         // TODO: Support more than 260 characters...
         if (_MAX_PATH > 260)
         {
-            Fail("Maximum path is potentially too large.", -1);
+            Fail("Maximum path is potentially too large.");
         }
 
         // TODO: This doesn't support non-ANSI characters. Use GetModuleFileNameW instead.
@@ -51,7 +51,7 @@ namespace VulkanDemo
         DWORD length = GetModuleFileName(NULL, path, _MAX_PATH);
         if (length <= 0)
         {
-            Fail("Failed to get the executable directory path.", -1);
+            Fail("Failed to get the executable directory path.");
         }
 
         return std::string(path, length);

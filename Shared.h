@@ -39,5 +39,5 @@ namespace VulkanDemo
     ///
     /// Logs the message of a fatal error and exits the application with the given code.
     ///
-    void Fail(const char* message, int code);
+    void Fail(const char* message, int code = -1);
 } // VulkanDemo
