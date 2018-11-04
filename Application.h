@@ -7,6 +7,7 @@ namespace VulkanDemo
     class GraphicsHelper;
     class ShaderLoader;
     class VulkanManager;
+    class FontManager;
 
     class Application
     {
@@ -22,6 +23,7 @@ namespace VulkanDemo
         inline VulkanManager * GetVulkanManager() const { return m_VulkanManager; }
         inline ShaderLoader * GetShaderLoader() const { return m_ShaderLoader; }
         inline GraphicsHelper * GetGraphicsHelper() const { return m_GraphicsHelper; }
+        inline FontManager * GetFontManager() const { return m_FontManager; }
 
         std::string GetExecutablePath() const;
 
@@ -31,5 +33,6 @@ namespace VulkanDemo
         VulkanManager * m_VulkanManager = nullptr;
         ShaderLoader * m_ShaderLoader = nullptr;
         GraphicsHelper * m_GraphicsHelper = nullptr;
+        FontManager * m_FontManager = nullptr;
     };
 } // VulkanDemo
