@@ -3,7 +3,6 @@
 #include "GraphicsHelper.h"
 #include "ShaderLoader.h"
 #include "VulkanManager.h"
-#include "text/FontManager.h"
 
 #include "Window.h"
 
@@ -20,14 +19,10 @@ namespace VulkanDemo
         m_VulkanManager = new VulkanManager();
         m_ShaderLoader = new ShaderLoader();
         m_GraphicsHelper = new GraphicsHelper();
-        m_FontManager = new FontManager();
     }
 
     Application::~Application()
     {
-        delete m_FontManager;
-        m_FontManager = nullptr;
-
         delete m_GraphicsHelper;
         m_GraphicsHelper = nullptr;
 
@@ -59,8 +54,6 @@ namespace VulkanDemo
 
     void Application::MainLoop()
     {
-        m_FontManager->LoadDefaultFonts();
-
         Window w{ 640, 480 };
 
         while (w.Run())
