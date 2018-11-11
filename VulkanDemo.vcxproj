@@ -70,19 +70,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
+    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
+    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
+    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
+    <IncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)external;$(SolutionDir)external/glm;$(IncludePath)</IncludePath>
     <LibraryPath>$(VULKAN_SDK)\Lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -159,6 +159,12 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstPipelineGenerator.cpp" />
+    <ClCompile Include="external\dear-imgui\imgui.cpp" />
+    <ClCompile Include="external\dear-imgui\imgui_demo.cpp" />
+    <ClCompile Include="external\dear-imgui\imgui_draw.cpp" />
+    <ClCompile Include="external\dear-imgui\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="external\dear-imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="external\dear-imgui\imgui_widgets.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GraphicsHelper.cpp" />
     <ClCompile Include="main.cpp" />
@@ -167,6 +173,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClCompile Include="SceneRenderer.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UIRenderer.cpp" />
     <ClCompile Include="VulkanManager.cpp" />
     <ClCompile Include="Shared.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -179,6 +186,14 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClInclude Include="Component.h" />
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="ConstPipelineGenerator.h" />
+    <ClInclude Include="external\dear-imgui\imconfig.h" />
+    <ClInclude Include="external\dear-imgui\imgui.h" />
+    <ClInclude Include="external\dear-imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="external\dear-imgui\imgui_impl_win32.h" />
+    <ClInclude Include="external\dear-imgui\imgui_internal.h" />
+    <ClInclude Include="external\dear-imgui\imstb_rectpack.h" />
+    <ClInclude Include="external\dear-imgui\imstb_textedit.h" />
+    <ClInclude Include="external\dear-imgui\imstb_truetype.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GraphicsHelper.h" />
     <ClInclude Include="Object.h" />
@@ -186,6 +201,7 @@ xcopy "$(ProjectDir)shaders\spirv" "$(TargetDir)spirv\" /Y</Command>
     <ClInclude Include="SceneRenderer.h" />
     <ClInclude Include="ShaderLoader.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UIRenderer.h" />
     <ClInclude Include="VulkanManager.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="Window.h" />

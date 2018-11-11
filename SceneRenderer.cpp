@@ -117,7 +117,7 @@ namespace VulkanDemo
 
         // Color attachment used for forward rendering, and returned.
         attachments[0].flags = 0;
-        attachments[0].format = Configuration::ForwardRendererColorFormat;
+        attachments[0].format = Configuration::SceneColorFormat;
         attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -128,7 +128,7 @@ namespace VulkanDemo
 
         // Depth attachment used for forward rendering.
         attachments[1].flags = 0;
-        attachments[1].format = Configuration::ForwardRendererDepthStencilFormat;
+        attachments[1].format = Configuration::SceneDepthStencilFormat;
         attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -210,7 +210,7 @@ namespace VulkanDemo
             colorImageCreateInfo.pNext = NULL;
             colorImageCreateInfo.flags = 0;
             colorImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-            colorImageCreateInfo.format = Configuration::ForwardRendererColorFormat;
+            colorImageCreateInfo.format = Configuration::SceneColorFormat;
             colorImageCreateInfo.extent.width = width;
             colorImageCreateInfo.extent.height = height;
             colorImageCreateInfo.extent.depth = 1;
@@ -233,7 +233,7 @@ namespace VulkanDemo
             colorImageViewCreateInfo.flags = 0;
             colorImageViewCreateInfo.image = m_ForwardColorImage;
             colorImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            colorImageViewCreateInfo.format = Configuration::ForwardRendererColorFormat;
+            colorImageViewCreateInfo.format = Configuration::SceneColorFormat;
             colorImageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
             colorImageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
             colorImageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -253,7 +253,7 @@ namespace VulkanDemo
             depthStencilImageCreateInfo.pNext = NULL;
             depthStencilImageCreateInfo.flags = 0;
             depthStencilImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-            depthStencilImageCreateInfo.format = Configuration::ForwardRendererDepthStencilFormat;
+            depthStencilImageCreateInfo.format = Configuration::SceneDepthStencilFormat;
             depthStencilImageCreateInfo.extent.width = width;
             depthStencilImageCreateInfo.extent.height = height;
             depthStencilImageCreateInfo.extent.depth = 1;
@@ -276,7 +276,7 @@ namespace VulkanDemo
             depthStencilImageViewCreateInfo.flags = 0;
             depthStencilImageViewCreateInfo.image = m_ForwardDepthStencilImage;
             depthStencilImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            depthStencilImageViewCreateInfo.format = Configuration::ForwardRendererDepthStencilFormat;
+            depthStencilImageViewCreateInfo.format = Configuration::SceneDepthStencilFormat;
             depthStencilImageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
             depthStencilImageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
             depthStencilImageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;

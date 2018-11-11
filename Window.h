@@ -12,12 +12,18 @@ namespace VulkanDemo
 {
     class BlitPipelineGenerator;
     class VulkanManager;
+    class UIRenderer;
 
     class Window
     {
     public:
         Window(int width, int height);
         ~Window();
+
+        HWND GetWindowHandle() const { return m_WindowHandle; }
+        inline VkRenderPass GetRenderPass() const { return m_RenderPass; }
+        inline int GetWidth() const { return m_Width; }
+        inline int GetHeight() const { return m_Height; }
 
         bool Run();
         void Render();
@@ -79,6 +85,7 @@ namespace VulkanDemo
         // Renderer-specific variables:
         VulkanManager*              m_VulkanManager = nullptr;
         SceneRenderer               m_SceneRenderer;
+        UIRenderer*                 m_UIRenderer = nullptr;
         VkSurfaceKHR                m_Surface = VK_NULL_HANDLE;
         VkSurfaceFormatKHR          m_Format{};
         VkSwapchainKHR              m_Swapchain = VK_NULL_HANDLE;

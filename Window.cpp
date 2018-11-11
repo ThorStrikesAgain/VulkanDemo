@@ -1,15 +1,18 @@
 #include "Window.h"
 
-#include <cassert>
-
-#include <Windows.h>
-#include <array>
-
-#include "Application.h"
+#include "UIRenderer.h"
 #include "BlitPipelineGenerator.h"
 #include "GraphicsHelper.h"
 #include "ShaderLoader.h"
 #include "VulkanManager.h"
+#include "Application.h"
+
+#include <cassert>
+
+#include <Windows.h>
+#include <windowsx.h>
+
+#include <array>
 
 namespace VulkanDemo
 {
@@ -27,6 +30,9 @@ namespace VulkanDemo
             window->m_IsClosed = true;
             return 0;
         default:
+            LRESULT result = 0;
+            if (window != nullptr && window->m_UIRenderer->ProcessEvent(hwnd, uMsg, wParam, lParam, &result))
+                return result;
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
         }
     }
@@ -52,10 +58,15 @@ namespace VulkanDemo
         CreateDescriptorSet();
 
         m_CommandBufferPool = new CommandBufferPool(m_ImageCount + 1);
+
+        m_UIRenderer = new UIRenderer(this);
     }
 
     Window::~Window()
     {
+        delete m_UIRenderer;
+        m_UIRenderer = nullptr;
+
         delete m_CommandBufferPool;
         m_CommandBufferPool = nullptr;
 
@@ -78,6 +89,7 @@ namespace VulkanDemo
             return false;
         }
 
+        // TODO: This allows only a single message to be processed by frame.
         MSG msg;
         if (PeekMessage(&msg, m_WindowHandle, 0, 0, PM_REMOVE))
         {
@@ -304,6 +316,8 @@ namespace VulkanDemo
 
     void Window::Render()
     {
+        m_UIRenderer->BeginNewFrame();
+
         // Render the scene.
         SceneRenderResult renderResult;
 
@@ -402,8 +416,11 @@ namespace VulkanDemo
             scissor.extent.height = m_Height;
             vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-            // Draw.
+            // Draw the scene.
             vkCmdDraw(commandBuffer, 4, 1, 0, 0);
+
+            // Draw the UI.
+            m_UIRenderer->Draw(commandBuffer);
         }
 
         vkCmdEndRenderPass(commandBuffer);
