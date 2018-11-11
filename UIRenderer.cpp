@@ -79,7 +79,7 @@ void VulkanDemo::UIRenderer::Draw(VkCommandBuffer commandBuffer)
     ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 }
 
-bool VulkanDemo::UIRenderer::ProcessEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT * result)
+bool VulkanDemo::UIRenderer::ProcessEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT & result)
 {
     if (ImGui::GetCurrentContext() == NULL)
         return false;
@@ -99,7 +99,7 @@ bool VulkanDemo::UIRenderer::ProcessEvent(HWND hwnd, UINT uMsg, WPARAM wParam, L
         if (!ImGui::IsAnyMouseDown() && ::GetCapture() == NULL)
             ::SetCapture(hwnd);
         io.MouseDown[button] = true;
-        *result = 0;
+        result = 0;
         return true;
     }
     case WM_LBUTTONUP:
@@ -113,38 +113,38 @@ bool VulkanDemo::UIRenderer::ProcessEvent(HWND hwnd, UINT uMsg, WPARAM wParam, L
         io.MouseDown[button] = false;
         if (!ImGui::IsAnyMouseDown() && ::GetCapture() == hwnd)
             ::ReleaseCapture();
-        *result = 0;
+        result = 0;
         return true;
     }
     case WM_MOUSEWHEEL:
         io.MouseWheel += (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
-        *result = 0;
+        result = 0;
         return true;
     case WM_MOUSEHWHEEL:
         io.MouseWheelH += (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA;
-        *result = 0;
+        result = 0;
         return true;
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
         if (wParam < 256)
             io.KeysDown[wParam] = 1;
-        *result = 0;
+        result = 0;
         return true;
     case WM_KEYUP:
     case WM_SYSKEYUP:
         if (wParam < 256)
             io.KeysDown[wParam] = 0;
-        *result = 0;
+        result = 0;
         return true;
     case WM_CHAR:
         // You can also use ToAscii()+GetKeyboardState() to retrieve characters.
         if (wParam > 0 && wParam < 0x10000)
             io.AddInputCharacter((unsigned short)wParam);
-        *result = 0;
+        result = 0;
         return true;
     /*case WM_SETCURSOR:
         if (LOWORD(lParam) == HTCLIENT && ImGui_ImplWin32_UpdateMouseCursor())
-            *result = 1;
+            result = 1;
         return false;*/
     }
 

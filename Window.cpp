@@ -31,7 +31,7 @@ namespace VulkanDemo
             return 0;
         default:
             LRESULT result = 0;
-            if (window != nullptr && window->m_UIRenderer->ProcessEvent(hwnd, uMsg, wParam, lParam, &result))
+            if (window != nullptr && window->m_UIRenderer->ProcessEvent(hwnd, uMsg, wParam, lParam, result))
                 return result;
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
         }

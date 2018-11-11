@@ -17,7 +17,7 @@ namespace VulkanDemo
         void BeginNewFrame();
         void Draw(VkCommandBuffer commandBuffer);
 
-        bool ProcessEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT * result);
+        bool ProcessEvent(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT & result);
 
     private:
         Window * m_Window = nullptr;
