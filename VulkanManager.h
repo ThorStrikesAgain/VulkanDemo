@@ -39,6 +39,7 @@ namespace VulkanDemo
         void CreateDescriptorPools();
         void DestroyDescriptorPools();
 
+        void DisplayPhysicalDeviceProperties();
         void DisplayAvailableInstanceLayers();
         void DisplayAvailableInstanceExtensions();
         void DisplayAvailableDeviceExtensions();

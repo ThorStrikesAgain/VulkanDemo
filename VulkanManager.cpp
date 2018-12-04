@@ -86,6 +86,8 @@ namespace VulkanDemo
 
         // Pick the first device.
         m_PhysicalDevice = physicalDevices[0];
+
+        DisplayPhysicalDeviceProperties();
     }
 
     void VulkanManager::DeselectPhysicalDevice()
@@ -181,6 +183,166 @@ namespace VulkanDemo
     {
         vkDestroyDescriptorPool(m_Device, m_DescriptorPool, NULL);
         m_DescriptorPool = VK_NULL_HANDLE;
+    }
+
+    void VulkanManager::DisplayPhysicalDeviceProperties()
+    {
+        std::cout << "Physical Device Properties:" << std::endl;
+        VkPhysicalDeviceProperties properties;
+        vkGetPhysicalDeviceProperties(m_PhysicalDevice, &properties);
+        std::cout << "apiVersion = " << properties.apiVersion << std::endl;
+        std::cout << "driverVersion = " << properties.driverVersion << std::endl;
+        std::cout << "vendorID = " << properties.vendorID << std::endl;
+        std::cout << "deviceID = " << properties.deviceID << std::endl;
+        std::cout << "deviceType = ";
+        switch (properties.deviceType)
+        {
+            case VK_PHYSICAL_DEVICE_TYPE_OTHER:
+                std::cout << "VK_PHYSICAL_DEVICE_TYPE_OTHER";
+                break;
+            case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+                std::cout << "VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU";
+                break;
+            case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+                std::cout << "VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU";
+                break;
+            case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+                std::cout << "VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU";
+                break;
+            case VK_PHYSICAL_DEVICE_TYPE_CPU:
+                std::cout << "VK_PHYSICAL_DEVICE_TYPE_CPU";
+                break;
+        }
+        std::cout << std::endl;
+        std::cout << "deviceName = " << properties.deviceName << std::endl;
+        std::cout << "limits =" << std::endl;
+        std::cout << "\t" << "maxImageDimension1D = " << properties.limits.maxImageDimension1D << std::endl;
+        std::cout << "\t" << "maxImageDimension2D = " << properties.limits.maxImageDimension2D << std::endl;
+        std::cout << "\t" << "maxImageDimension3D = " << properties.limits.maxImageDimension3D << std::endl;
+        std::cout << "\t" << "maxImageDimensionCube = " << properties.limits.maxImageDimensionCube << std::endl;
+        std::cout << "\t" << "maxImageArrayLayers = " << properties.limits.maxImageArrayLayers << std::endl;
+        std::cout << "\t" << "maxTexelBufferElements = " << properties.limits.maxTexelBufferElements << std::endl;
+        std::cout << "\t" << "maxUniformBufferRange = " << properties.limits.maxUniformBufferRange << std::endl;
+        std::cout << "\t" << "maxStorageBufferRange = " << properties.limits.maxStorageBufferRange << std::endl;
+        std::cout << "\t" << "maxPushConstantsSize = " << properties.limits.maxPushConstantsSize << std::endl;
+        std::cout << "\t" << "maxMemoryAllocationCount = " << properties.limits.maxMemoryAllocationCount << std::endl;
+        std::cout << "\t" << "maxSamplerAllocationCount = " << properties.limits.maxSamplerAllocationCount << std::endl;
+        std::cout << "\t" << "bufferImageGranularity = " << properties.limits.bufferImageGranularity << std::endl;
+        std::cout << "\t" << "sparseAddressSpaceSize = " << properties.limits.sparseAddressSpaceSize << std::endl;
+        std::cout << "\t" << "maxBoundDescriptorSets = " << properties.limits.maxBoundDescriptorSets << std::endl;
+        std::cout << "\t" << "maxPerStageDescriptorSamplers = " << properties.limits.maxPerStageDescriptorSamplers << std::endl;
+        std::cout << "\t" << "maxPerStageDescriptorUniformBuffers = " << properties.limits.maxPerStageDescriptorUniformBuffers << std::endl;
+        std::cout << "\t" << "maxPerStageDescriptorStorageBuffers = " << properties.limits.maxPerStageDescriptorStorageBuffers << std::endl;
+        std::cout << "\t" << "maxPerStageDescriptorSampledImages = " << properties.limits.maxPerStageDescriptorSampledImages << std::endl;
+        std::cout << "\t" << "maxPerStageDescriptorStorageImages = " << properties.limits.maxPerStageDescriptorStorageImages << std::endl;
+        std::cout << "\t" << "maxPerStageDescriptorInputAttachments = " << properties.limits.maxPerStageDescriptorInputAttachments << std::endl;
+        std::cout << "\t" << "maxPerStageResources = " << properties.limits.maxPerStageResources << std::endl;
+        std::cout << "\t" << "maxDescriptorSetSamplers = " << properties.limits.maxDescriptorSetSamplers << std::endl;
+        std::cout << "\t" << "maxDescriptorSetUniformBuffers = " << properties.limits.maxDescriptorSetUniformBuffers << std::endl;
+        std::cout << "\t" << "maxDescriptorSetUniformBuffersDynamic = " << properties.limits.maxDescriptorSetUniformBuffersDynamic << std::endl;
+        std::cout << "\t" << "maxDescriptorSetStorageBuffers = " << properties.limits.maxDescriptorSetStorageBuffers << std::endl;
+        std::cout << "\t" << "maxDescriptorSetStorageBuffersDynamic = " << properties.limits.maxDescriptorSetStorageBuffersDynamic << std::endl;
+        std::cout << "\t" << "maxDescriptorSetSampledImages = " << properties.limits.maxDescriptorSetSampledImages << std::endl;
+        std::cout << "\t" << "maxDescriptorSetStorageImages = " << properties.limits.maxDescriptorSetStorageImages << std::endl;
+        std::cout << "\t" << "maxDescriptorSetInputAttachments = " << properties.limits.maxDescriptorSetInputAttachments << std::endl;
+        std::cout << "\t" << "maxVertexInputAttributes = " << properties.limits.maxVertexInputAttributes << std::endl;
+        std::cout << "\t" << "maxVertexInputBindings = " << properties.limits.maxVertexInputBindings << std::endl;
+        std::cout << "\t" << "maxVertexInputAttributeOffset = " << properties.limits.maxVertexInputAttributeOffset << std::endl;
+        std::cout << "\t" << "maxVertexInputBindingStride = " << properties.limits.maxVertexInputBindingStride << std::endl;
+        std::cout << "\t" << "maxVertexOutputComponents = " << properties.limits.maxVertexOutputComponents << std::endl;
+        std::cout << "\t" << "maxTessellationGenerationLevel = " << properties.limits.maxTessellationGenerationLevel << std::endl;
+        std::cout << "\t" << "maxTessellationPatchSize = " << properties.limits.maxTessellationPatchSize << std::endl;
+        std::cout << "\t" << "maxTessellationControlPerVertexInputComponents = " << properties.limits.maxTessellationControlPerVertexInputComponents << std::endl;
+        std::cout << "\t" << "maxTessellationControlPerVertexOutputComponents = " << properties.limits.maxTessellationControlPerVertexOutputComponents << std::endl;
+        std::cout << "\t" << "maxTessellationControlPerPatchOutputComponents = " << properties.limits.maxTessellationControlPerPatchOutputComponents << std::endl;
+        std::cout << "\t" << "maxTessellationControlTotalOutputComponents = " << properties.limits.maxTessellationControlTotalOutputComponents << std::endl;
+        std::cout << "\t" << "maxTessellationEvaluationInputComponents = " << properties.limits.maxTessellationEvaluationInputComponents << std::endl;
+        std::cout << "\t" << "maxTessellationEvaluationOutputComponents = " << properties.limits.maxTessellationEvaluationOutputComponents << std::endl;
+        std::cout << "\t" << "maxGeometryShaderInvocations = " << properties.limits.maxGeometryShaderInvocations << std::endl;
+        std::cout << "\t" << "maxGeometryInputComponents = " << properties.limits.maxGeometryInputComponents << std::endl;
+        std::cout << "\t" << "maxGeometryOutputComponents = " << properties.limits.maxGeometryOutputComponents << std::endl;
+        std::cout << "\t" << "maxGeometryOutputVertices = " << properties.limits.maxGeometryOutputVertices << std::endl;
+        std::cout << "\t" << "maxGeometryTotalOutputComponents = " << properties.limits.maxGeometryTotalOutputComponents << std::endl;
+        std::cout << "\t" << "maxFragmentInputComponents = " << properties.limits.maxFragmentInputComponents << std::endl;
+        std::cout << "\t" << "maxFragmentOutputAttachments = " << properties.limits.maxFragmentOutputAttachments << std::endl;
+        std::cout << "\t" << "maxFragmentDualSrcAttachments = " << properties.limits.maxFragmentDualSrcAttachments << std::endl;
+        std::cout << "\t" << "maxFragmentCombinedOutputResources = " << properties.limits.maxFragmentCombinedOutputResources << std::endl;
+        std::cout << "\t" << "maxComputeSharedMemorySize = " << properties.limits.maxComputeSharedMemorySize << std::endl;
+        std::cout << "\t" << "maxComputeWorkGroupCount = " << 
+            properties.limits.maxComputeWorkGroupCount[0] << " " <<
+            properties.limits.maxComputeWorkGroupCount[1] << " " <<
+            properties.limits.maxComputeWorkGroupCount[2] << std::endl;
+        std::cout << "\t" << "maxComputeWorkGroupInvocations = " << properties.limits.maxComputeWorkGroupInvocations << std::endl;
+        std::cout << "\t" << "maxComputeWorkGroupSize = " <<
+            properties.limits.maxComputeWorkGroupSize[0] << " " <<
+            properties.limits.maxComputeWorkGroupSize[1] << " " <<
+            properties.limits.maxComputeWorkGroupSize[2] << std::endl;
+        std::cout << "\t" << "subPixelPrecisionBits = " << properties.limits.subPixelPrecisionBits << std::endl;
+        std::cout << "\t" << "subTexelPrecisionBits = " << properties.limits.subTexelPrecisionBits << std::endl;
+        std::cout << "\t" << "mipmapPrecisionBits = " << properties.limits.mipmapPrecisionBits << std::endl;
+        std::cout << "\t" << "maxDrawIndexedIndexValue = " << properties.limits.maxDrawIndexedIndexValue << std::endl;
+        std::cout << "\t" << "maxDrawIndirectCount = " << properties.limits.maxDrawIndirectCount << std::endl;
+        std::cout << "\t" << "maxSamplerLodBias = " << properties.limits.maxSamplerLodBias << std::endl;
+        std::cout << "\t" << "maxSamplerAnisotropy = " << properties.limits.maxSamplerAnisotropy << std::endl;
+        std::cout << "\t" << "maxViewports = " << properties.limits.maxViewports << std::endl;
+        std::cout << "\t" << "maxViewportDimensions = " << 
+            properties.limits.maxViewportDimensions[0] << " " << 
+            properties.limits.maxViewportDimensions[1] << std::endl;
+        std::cout << "\t" << "viewportBoundsRange = " << 
+            properties.limits.viewportBoundsRange[0] << " " <<
+            properties.limits.viewportBoundsRange[1] << std::endl;
+        std::cout << "\t" << "viewportSubPixelBits = " << properties.limits.viewportSubPixelBits << std::endl;
+        std::cout << "\t" << "minMemoryMapAlignment = " << properties.limits.minMemoryMapAlignment << std::endl;
+        std::cout << "\t" << "minTexelBufferOffsetAlignment = " << properties.limits.minTexelBufferOffsetAlignment << std::endl;
+        std::cout << "\t" << "minUniformBufferOffsetAlignment = " << properties.limits.minUniformBufferOffsetAlignment << std::endl;
+        std::cout << "\t" << "minStorageBufferOffsetAlignment = " << properties.limits.minStorageBufferOffsetAlignment << std::endl;
+        std::cout << "\t" << "minTexelOffset = " << properties.limits.minTexelOffset << std::endl;
+        std::cout << "\t" << "maxTexelOffset = " << properties.limits.maxTexelOffset << std::endl;
+        std::cout << "\t" << "minTexelGatherOffset = " << properties.limits.minTexelGatherOffset << std::endl;
+        std::cout << "\t" << "maxTexelGatherOffset = " << properties.limits.maxTexelGatherOffset << std::endl;
+        std::cout << "\t" << "minInterpolationOffset = " << properties.limits.minInterpolationOffset << std::endl;
+        std::cout << "\t" << "maxInterpolationOffset = " << properties.limits.maxInterpolationOffset << std::endl;
+        std::cout << "\t" << "subPixelInterpolationOffsetBits = " << properties.limits.subPixelInterpolationOffsetBits << std::endl;
+        std::cout << "\t" << "maxFramebufferWidth = " << properties.limits.maxFramebufferWidth << std::endl;
+        std::cout << "\t" << "maxFramebufferHeight = " << properties.limits.maxFramebufferHeight << std::endl;
+        std::cout << "\t" << "maxFramebufferLayers = " << properties.limits.maxFramebufferLayers << std::endl;
+        std::cout << "\t" << "framebufferColorSampleCounts = " << properties.limits.framebufferColorSampleCounts << std::endl;
+        std::cout << "\t" << "framebufferDepthSampleCounts = " << properties.limits.framebufferDepthSampleCounts << std::endl;
+        std::cout << "\t" << "framebufferStencilSampleCounts = " << properties.limits.framebufferStencilSampleCounts << std::endl;
+        std::cout << "\t" << "framebufferNoAttachmentsSampleCounts = " << properties.limits.framebufferNoAttachmentsSampleCounts << std::endl;
+        std::cout << "\t" << "maxColorAttachments = " << properties.limits.maxColorAttachments << std::endl;
+        std::cout << "\t" << "sampledImageColorSampleCounts = " << properties.limits.sampledImageColorSampleCounts << std::endl;
+        std::cout << "\t" << "sampledImageIntegerSampleCounts = " << properties.limits.sampledImageIntegerSampleCounts << std::endl;
+        std::cout << "\t" << "sampledImageDepthSampleCounts = " << properties.limits.sampledImageDepthSampleCounts << std::endl;
+        std::cout << "\t" << "sampledImageStencilSampleCounts = " << properties.limits.sampledImageStencilSampleCounts << std::endl;
+        std::cout << "\t" << "storageImageSampleCounts = " << properties.limits.storageImageSampleCounts << std::endl;
+        std::cout << "\t" << "maxSampleMaskWords = " << properties.limits.maxSampleMaskWords << std::endl;
+        std::cout << "\t" << "timestampComputeAndGraphics = " << properties.limits.timestampComputeAndGraphics << std::endl;
+        std::cout << "\t" << "timestampPeriod = " << properties.limits.timestampPeriod << std::endl;
+        std::cout << "\t" << "maxClipDistances = " << properties.limits.maxClipDistances << std::endl;
+        std::cout << "\t" << "maxCullDistances = " << properties.limits.maxCullDistances << std::endl;
+        std::cout << "\t" << "maxCombinedClipAndCullDistances = " << properties.limits.maxCombinedClipAndCullDistances << std::endl;
+        std::cout << "\t" << "discreteQueuePriorities = " << properties.limits.discreteQueuePriorities << std::endl;
+        std::cout << "\t" << "pointSizeRange = " << 
+            properties.limits.pointSizeRange[0] << " " <<
+            properties.limits.pointSizeRange[1] << std::endl;
+        std::cout << "\t" << "lineWidthRange = " <<
+            properties.limits.lineWidthRange[0] << " " <<
+            properties.limits.lineWidthRange[1] << std::endl;
+        std::cout << "\t" << "pointSizeGranularity = " << properties.limits.pointSizeGranularity << std::endl;
+        std::cout << "\t" << "lineWidthGranularity = " << properties.limits.lineWidthGranularity << std::endl;
+        std::cout << "\t" << "strictLines = " << properties.limits.strictLines << std::endl;
+        std::cout << "\t" << "standardSampleLocations = " << properties.limits.standardSampleLocations << std::endl;
+        std::cout << "\t" << "optimalBufferCopyOffsetAlignment = " << properties.limits.optimalBufferCopyOffsetAlignment << std::endl;
+        std::cout << "\t" << "optimalBufferCopyRowPitchAlignment = " << properties.limits.optimalBufferCopyRowPitchAlignment << std::endl;
+        std::cout << "\t" << "nonCoherentAtomSize = " << properties.limits.nonCoherentAtomSize << std::endl;
+        std::cout << "sparseProperties =" << std::endl;
+        std::cout << "\t" << "residencyStandard2DBlockShape = " << properties.sparseProperties.residencyStandard2DBlockShape << std::endl;
+        std::cout << "\t" << "residencyStandard2DMultisampleBlockShape = " << properties.sparseProperties.residencyStandard2DMultisampleBlockShape << std::endl;
+        std::cout << "\t" << "residencyStandard3DBlockShape = " << properties.sparseProperties.residencyStandard3DBlockShape << std::endl;
+        std::cout << "\t" << "residencyAlignedMipSize = " << properties.sparseProperties.residencyAlignedMipSize << std::endl;
+        std::cout << "\t" << "residencyNonResidentStrict = " << properties.sparseProperties.residencyNonResidentStrict << std::endl;
+        std::cout << std::endl;
     }
 
     void VulkanManager::DisplayAvailableInstanceLayers()
