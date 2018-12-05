@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
 
 #include "BUILD_OPTIONS.h"
 
@@ -201,7 +202,7 @@ namespace VulkanDemo
             for (int row = 0; row < rowCount; ++row)
             {
                 const char * item = getItem(row, col);
-                widths[col] = max(widths[col], (int)strlen(item));
+                widths[col] = std::max(widths[col], (int)strlen(item));
             }
         }
 

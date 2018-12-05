@@ -20,6 +20,7 @@ namespace VulkanDemo
         InitDebug();
         SelectPhysicalDevice();
         CreateDevice();
+        CreateAllocator();
         CreateCommandPools();
         CreateDescriptorPools();
     }
@@ -28,6 +29,7 @@ namespace VulkanDemo
     {
         DestroyDescriptorPools();
         DestroyCommandPools();
+        DestroyAllocator();
         DestroyDevice();
         DeselectPhysicalDevice();
         DeinitDebug();
@@ -142,6 +144,27 @@ namespace VulkanDemo
     {
         vkDestroyDevice(m_Device, NULL);
         m_Device = NULL;
+    }
+
+    void VulkanManager::CreateAllocator()
+    {
+        VmaAllocatorCreateInfo allocatorCreateInfo{};
+        allocatorCreateInfo.physicalDevice = m_PhysicalDevice;
+        allocatorCreateInfo.device = m_Device;
+        allocatorCreateInfo.preferredLargeHeapBlockSize = 0;
+        allocatorCreateInfo.pAllocationCallbacks = NULL;
+        allocatorCreateInfo.pDeviceMemoryCallbacks = NULL;
+        allocatorCreateInfo.frameInUseCount = 0; // Not used.
+        allocatorCreateInfo.pHeapSizeLimit = NULL;
+        allocatorCreateInfo.pVulkanFunctions = NULL; // Static functions are used.
+        allocatorCreateInfo.pRecordSettings = NULL; // Not used.
+        vmaCreateAllocator(&allocatorCreateInfo, &m_Allocator);
+    }
+
+    void VulkanManager::DestroyAllocator()
+    {
+        vmaDestroyAllocator(m_Allocator);
+        m_Allocator = NULL;
     }
 
     void VulkanManager::CreateCommandPools()

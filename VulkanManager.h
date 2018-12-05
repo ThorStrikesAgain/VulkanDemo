@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
-
 #include "Shared.h"
+
+#include <vector>
 
 namespace VulkanDemo
 {
@@ -15,6 +15,7 @@ namespace VulkanDemo
         inline VkInstance           GetInstance() const { return m_Instance; }
         inline VkPhysicalDevice     GetPhysicalDevice() const { return m_PhysicalDevice; }
         inline VkDevice             GetDevice() const { return m_Device; }
+        inline VmaAllocator        GetAllocator() const { return m_Allocator; }
 
         inline uint32_t             GetGraphicsQueueFamilyIndex() const { return m_GraphicsQueueFamilyIndex; }
         inline VkQueue              GetGraphicsQueue() const{ return m_GraphicsQueue; }
@@ -32,6 +33,9 @@ namespace VulkanDemo
 
         void CreateDevice();
         void DestroyDevice();
+
+        void CreateAllocator();
+        void DestroyAllocator();
 
         void CreateCommandPools();
         void DestroyCommandPools();
@@ -57,6 +61,7 @@ namespace VulkanDemo
         VkInstance              m_Instance = NULL;
         VkPhysicalDevice        m_PhysicalDevice = NULL;
         VkDevice                m_Device = NULL;
+        VmaAllocator           m_Allocator = NULL;
 
         std::vector<const char*> m_UsedInstanceLayerNames;
         std::vector<const char*> m_UsedInstanceExtensionNames;

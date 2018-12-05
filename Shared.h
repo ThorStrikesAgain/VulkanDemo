@@ -2,6 +2,8 @@
 
 #define VK_USE_PLATFORM_WIN32_KHR
 
+#include "vma/vk_mem_alloc.h"
+
 #include <vulkan/vulkan.h>
 
 #include <functional>
