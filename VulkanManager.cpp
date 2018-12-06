@@ -89,6 +89,7 @@ namespace VulkanDemo
         // Pick the first device.
         m_PhysicalDevice = physicalDevices[0];
 
+        DisplayPhysicalDeviceFeatures();
         DisplayPhysicalDeviceProperties();
     }
 
@@ -208,11 +209,76 @@ namespace VulkanDemo
         m_DescriptorPool = VK_NULL_HANDLE;
     }
 
+    void VulkanManager::DisplayPhysicalDeviceFeatures()
+    {
+        VkPhysicalDeviceFeatures features;
+        vkGetPhysicalDeviceFeatures(m_PhysicalDevice, &features);
+
+        std::cout << "Physical Device Features:" << std::endl;
+        std::cout << "robustBufferAccess = " << features.robustBufferAccess << std::endl;
+        std::cout << "fullDrawIndexUint32 = " << features.fullDrawIndexUint32 << std::endl;
+        std::cout << "imageCubeArray = " << features.imageCubeArray << std::endl;
+        std::cout << "independentBlend = " << features.independentBlend << std::endl;
+        std::cout << "geometryShader = " << features.geometryShader << std::endl;
+        std::cout << "tessellationShader = " << features.tessellationShader << std::endl;
+        std::cout << "sampleRateShading = " << features.sampleRateShading << std::endl;
+        std::cout << "dualSrcBlend = " << features.dualSrcBlend << std::endl;
+        std::cout << "logicOp = " << features.logicOp << std::endl;
+        std::cout << "multiDrawIndirect = " << features.multiDrawIndirect << std::endl;
+        std::cout << "drawIndirectFirstInstance = " << features.drawIndirectFirstInstance << std::endl;
+        std::cout << "depthClamp = " << features.depthClamp << std::endl;
+        std::cout << "depthBiasClamp = " << features.depthBiasClamp << std::endl;
+        std::cout << "fillModeNonSolid = " << features.fillModeNonSolid << std::endl;
+        std::cout << "depthBounds = " << features.depthBounds << std::endl;
+        std::cout << "wideLines = " << features.wideLines << std::endl;
+        std::cout << "largePoints = " << features.largePoints << std::endl;
+        std::cout << "alphaToOne = " << features.alphaToOne << std::endl;
+        std::cout << "multiViewport = " << features.multiViewport << std::endl;
+        std::cout << "samplerAnisotropy = " << features.samplerAnisotropy << std::endl;
+        std::cout << "textureCompressionETC2 = " << features.textureCompressionETC2 << std::endl;
+        std::cout << "textureCompressionASTC_LDR = " << features.textureCompressionASTC_LDR << std::endl;
+        std::cout << "textureCompressionBC = " << features.textureCompressionBC << std::endl;
+        std::cout << "occlusionQueryPrecise = " << features.occlusionQueryPrecise << std::endl;
+        std::cout << "pipelineStatisticsQuery = " << features.pipelineStatisticsQuery << std::endl;
+        std::cout << "vertexPipelineStoresAndAtomics = " << features.vertexPipelineStoresAndAtomics << std::endl;
+        std::cout << "fragmentStoresAndAtomics = " << features.fragmentStoresAndAtomics << std::endl;
+        std::cout << "shaderTessellationAndGeometryPointSize = " << features.shaderTessellationAndGeometryPointSize << std::endl;
+        std::cout << "shaderImageGatherExtended = " << features.shaderImageGatherExtended << std::endl;
+        std::cout << "shaderStorageImageExtendedFormats = " << features.shaderStorageImageExtendedFormats << std::endl;
+        std::cout << "shaderStorageImageMultisample = " << features.shaderStorageImageMultisample << std::endl;
+        std::cout << "shaderStorageImageReadWithoutFormat = " << features.shaderStorageImageReadWithoutFormat << std::endl;
+        std::cout << "shaderStorageImageWriteWithoutFormat = " << features.shaderStorageImageWriteWithoutFormat << std::endl;
+        std::cout << "shaderUniformBufferArrayDynamicIndexing = " << features.shaderUniformBufferArrayDynamicIndexing << std::endl;
+        std::cout << "shaderSampledImageArrayDynamicIndexing = " << features.shaderSampledImageArrayDynamicIndexing << std::endl;
+        std::cout << "shaderStorageBufferArrayDynamicIndexing = " << features.shaderStorageBufferArrayDynamicIndexing << std::endl;
+        std::cout << "shaderStorageImageArrayDynamicIndexing = " << features.shaderStorageImageArrayDynamicIndexing << std::endl;
+        std::cout << "shaderClipDistance = " << features.shaderClipDistance << std::endl;
+        std::cout << "shaderCullDistance = " << features.shaderCullDistance << std::endl;
+        std::cout << "shaderFloat64 = " << features.shaderFloat64 << std::endl;
+        std::cout << "shaderInt64 = " << features.shaderInt64 << std::endl;
+        std::cout << "shaderInt16 = " << features.shaderInt16 << std::endl;
+        std::cout << "shaderResourceResidency = " << features.shaderResourceResidency << std::endl;
+        std::cout << "shaderResourceMinLod = " << features.shaderResourceMinLod << std::endl;
+        std::cout << "sparseBinding = " << features.sparseBinding << std::endl;
+        std::cout << "sparseResidencyBuffer = " << features.sparseResidencyBuffer << std::endl;
+        std::cout << "sparseResidencyImage2D = " << features.sparseResidencyImage2D << std::endl;
+        std::cout << "sparseResidencyImage3D = " << features.sparseResidencyImage3D << std::endl;
+        std::cout << "sparseResidency2Samples = " << features.sparseResidency2Samples << std::endl;
+        std::cout << "sparseResidency4Samples = " << features.sparseResidency4Samples << std::endl;
+        std::cout << "sparseResidency8Samples = " << features.sparseResidency8Samples << std::endl;
+        std::cout << "sparseResidency16Samples = " << features.sparseResidency16Samples << std::endl;
+        std::cout << "sparseResidencyAliased = " << features.sparseResidencyAliased << std::endl;
+        std::cout << "variableMultisampleRate = " << features.variableMultisampleRate << std::endl;
+        std::cout << "inheritedQueries = " << features.inheritedQueries << std::endl;
+        std::cout << std::endl;
+    }
+
     void VulkanManager::DisplayPhysicalDeviceProperties()
     {
-        std::cout << "Physical Device Properties:" << std::endl;
         VkPhysicalDeviceProperties properties;
         vkGetPhysicalDeviceProperties(m_PhysicalDevice, &properties);
+
+        std::cout << "Physical Device Properties:" << std::endl;
         std::cout << "apiVersion = " << properties.apiVersion << std::endl;
         std::cout << "driverVersion = " << properties.driverVersion << std::endl;
         std::cout << "vendorID = " << properties.vendorID << std::endl;
